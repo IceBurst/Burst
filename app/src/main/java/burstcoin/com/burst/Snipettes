@@ -1,0 +1,15 @@
+    //private ProgressDialog pDialog;
+
+            /*
+            pDialog = new ProgressDialog(MainActivity.this);
+            pDialog.setMessage("Attempting login...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(true);
+            pDialog.show();
+            */
+
+        /*
+        if (pDialog != null && pDialog.isShowing()) {
+            pDialog.dismiss();
+        }
+        */

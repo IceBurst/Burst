@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_wallet"
+            android:icon="@drawable/ic_faucet"
+            android:title="Login" />
+        <item
+            android:id="@+id/load_passphrase"
+            android:icon="@drawable/ic_lock_open_24dp"
+            android:title="Load Passphrase" />
+        <item
+            android:id="@+id/save_passphrase"
+            android:icon="@drawable/ic_save"
+            android:title="Save Passphrase"
+            />
+        <item
+            android:id="@+id/burst_crowd"
+            android:icon="@drawable/ic_group_add_24dp"
+            android:title="Crowdfunding" />
+        <item
+            android:id="@+id/fauet"
+            android:icon="@drawable/ic_receipt_24dp"
+            android:title="Faucet" />
+    </group>
+
+    <item android:title="Tools:">
+        <menu>
+            <item
+                android:id="@+id/nav_plotting"
+                android:icon="@drawable/ic_plotting"
+                android:title="Plotting" />
+            <item
+                android:id="@+id/nav_mining"
+                android:icon="@drawable/ic_faucet2"
+                android:title="Mining" />
+        </menu>
+    </item>
+
+</menu>
