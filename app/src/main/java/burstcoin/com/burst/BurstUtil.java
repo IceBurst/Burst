@@ -130,7 +130,7 @@ public class BurstUtil {
                     try {
                         String numericID = json.getString("account");
                         writeNumericIDToLocal(burstID, numericID, context);
-                        provider.notice("GOTNUMERICID", "SUCCESS");
+                        provider.notice("GOTNUMERICID", "SUCCESS", numericID);
                     } catch (JSONException e) {
                         provider.notice("GOTNUMERICID", "JSON EXCEPTION");
                     }

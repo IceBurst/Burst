@@ -3,7 +3,6 @@ package burstcoin.com.burst;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ClipData;
-import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.content.ContentValues;
 import android.content.Context;
@@ -12,8 +11,6 @@ import android.content.res.ColorStateList;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
@@ -29,8 +26,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.webkit.WebChromeClient;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -38,16 +33,10 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
-
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Scanner;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, IntProvider {
 
@@ -62,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private SharedPreferences sharedPreferences;
     ProgressDialog progressDialog;
     private boolean isAtHome=true;
-    private String burstID = ""; //BURST-Q7JT-EDPJ-NGAU-GJTLJ"; // Get this later, for testing it's static
+    private String burstID = "";
     private String numericID = "";
     //Toolbar toolbar;
 
@@ -366,11 +355,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_mining:
                     // ToDo: Using this as a Cheap test button while we Design out the Mining Phase
                     BurstUtil x = new BurstUtil((IntProvider)this);
-                    x.getNumericIDFromBurstID(burstID, this);
-                    //Toast.makeText(getApplicationContext(),"Not implemented yet. Under development",Toast.LENGTH_LONG).show();
+                    if (!burstID.isEmpty())
+                        x.getNumericIDFromBurstID(burstID, this);
+
+                    //    Toast.makeText(getApplicationContext(),"Not implemented yet. Under development",Toast.LENGTH_LONG).show();
                 break;
-
-
 
             default:
 
@@ -380,6 +369,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mDrawer.closeDrawers();
     }
 
+    // This is how Data is passed back to main via the IntProvider Class
     @Override
     public void notice(String... args){
         // ToDo: This is where we handle things
@@ -387,8 +377,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
          * args[0] is probably the identified
          * args[1] is probably a status message, SUCCESS or something else, typically an error code
          */
+        switch(args[0]) {
+            case "GOTBURSTID":
+                if (args[1].contains("SUCCESS"))
+                    this.burstID = args[2];
+                break;
+            case "GOTNUMERICID":
+                if (args[1].contains("SUCCESS"))
+                    this.numericID = args[2];
+                break;
+        }
+
+        String debug = "";
+        for (String s : args)
+            debug = debug + " " + s;
+        Log.d(TAG, debug);
         // This is were we get info back from BurstUtils
-        Toast.makeText(getApplicationContext(),"We got a notice back from BurtUtils: "+BurstUtil.getNumericIDFromLocal(burstID, this),Toast.LENGTH_LONG).show();
+        //Toast.makeText(getApplicationContext(),"We got a notice back from BurtUtils: "+BurstUtil.getNumericIDFromLocal(burstID, this),Toast.LENGTH_LONG).show();
     }
 
     public void showToast(View view) {
@@ -495,73 +500,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
-        //webSettings.setAppCacheEnabled(false);
-        //webSettings.setLoadWithOverviewMode(true);
 
         mWebView.loadUrl(url);
-        mWebView.addJavascriptInterface(new JSInterface(), "Android");
+        mWebView.addJavascriptInterface(new JSInterface((IntProvider)this), "Android");
         mWebView.setWebViewClient(new WebViewClient(){
-        //mWebView.setWebChromeClient(new WebChromeClient(){
             @SuppressWarnings("deprecation")
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                if((burstID.isEmpty() || burstID.contains("No Name Set")) && url.contains("index.html")) {
-
-                    // This throw an error in the WebView Console: I/chromium: [INFO:CONSOLE(1)] "Uncaught TypeError: undefined is not a function", source:  (1)
-                    // Has something to do with the MutationObserver function calls
+                if(burstID.isEmpty()  && url.contains("https://mwallet.burst-team.us:8125/index.html")) {
                     String s =
                             "javascript:var options = {subtree: true, childList: true, attributes: true, characterData: true};" +
-                            "var account = document.getElementByID('account_id');" +
-                            "var observer = new MutationObserver( function(mutations) {" +
-                              "mutations.forEach(function (mutation) {" +
-                                //"window.Android.getBurstID('sample');" +
-                              "})" +
-                            "});" +
-                            "observer.observe(account, options);";
+                            "try { " +
+                              "var account = $('#account_id')[0];" + // + dashboard_message
+                                 "var observer = new MutationObserver( function(mutations) {" +
+                                   "mutations.forEach(function (mutation) {" +
+                                     "Android.getBurstID(account.innerHTML);" +
+                                   "})" +
+                                 "});" +
+                                 "observer.observe(account, options);" +
+                            "} catch (err) { Android.getBurstID('error:' + err) }";
 
-
-                    // This simple line below works
-                    //s = "javascript:window.Android.getBurstID(\"some text\");";
-
-                    Log.d(TAG, "ScriptWas:"+s);
-
-                    // OnChange can not monitor a innerHTML, it's textarea and input types
-                    //String s = "javascript:document.getElementById('account_id').addEventListener('change',window.Android.getBurstID(document.getElementById('account_id').innerHTML))";
-
+                    //Log.d(TAG, "ScriptWas:"+s);
                     mWebView.loadUrl(s);
                 }
                 progressDialog.cancel();
             }
-
-            /*
-            @SuppressWarnings("deprecation")
-            @Override
-            public WebResourceResponse shouldInterceptRequest (final WebView view, String url) {
-                if (url.contains("index.html")) {
-                    //return new WebResourceResponse("text/html", "UTF-8", new FileInputStream("local_url")));
-
-                } else {
-                    return super.shouldInterceptRequest(view, url);
-                }
-            }*/
-
-            /*
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                //if ( burstID.isEmpty()) {  // url.contains("index.html")&&
-                    // document.getElementById ( "tdid" ).innerText
-                    //<div style="margin-bottom:5px;"><a href="#" id="account_name" data-toggle="modal" data-target="#account_info_modal" data-i18n="no_name_set">No Name Set</a></div>
-                Log.d(TAG, "Adding JSInterface");
-                //mWebView.loadUrl("javascript:window.Android.getBurstID(document.getElementsByTagName('account_name').innerHTML);");
-                //mWebView.loadUrl("javascript:window.Android.getBurstID('STRING OF DATA');");
-                    // getBurstID
-                mWebView.loadUrl("javascript:window.HTMLOUT.processHTML('<head>'+document.getElementsByTagName('html')[0].innerHTML+'</head>');");
-                return true;
-                //}
-             //return false;
-            }
-            */
         });
     }
 }
