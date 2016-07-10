@@ -29,6 +29,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -42,8 +43,11 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Scanner;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, IntProvider {
 
@@ -58,9 +62,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private SharedPreferences sharedPreferences;
     ProgressDialog progressDialog;
     private boolean isAtHome=true;
-    private String burstID = "BURST-Q7JT-EDPJ-NGAU-GJTLJ"; // Get this later, got testing it's static
+    private String burstID = ""; //BURST-Q7JT-EDPJ-NGAU-GJTLJ"; // Get this later, for testing it's static
     private String numericID = "";
-    Toolbar toolbar;
+    //Toolbar toolbar;
+
+    private final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,47 +76,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         databaseHandler = new DatabaseHandler(MainActivity.this);
         sqLiteDatabase = databaseHandler.getWritableDatabase();
         mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        // Load up a Spinner
         progressDialog=new ProgressDialog(MainActivity.this);
         progressDialog.setMessage("Loading");
         progressDialog.show();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        //toolbar.getBackground().setAlpha(0);
-
 
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawer.setDrawerListener(toggle);
         toggle.syncState();
 
-
-//
-//
-
-
         mWebView = (WebView) findViewById(R.id.activity_main_webview);
-        WebSettings webSettings = mWebView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setDomStorageEnabled(true);
-        mWebView.loadUrl("https://mwallet.burst-team.us:8125/index.html");
-        mWebView.setWebViewClient(new WebViewClient(){
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view, url);
-                progressDialog.cancel();
-            }
 
-        });
 
-//
-
+        String url = "https://mwallet.burst-team.us:8125/index.html";
+        loadSite(url);
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -128,7 +117,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 });
     }
 
-
     public void selectDrawerItem(MenuItem menuItem) {
         // Create a new fragment and specify the planet to show based on
         // position
@@ -137,6 +125,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             case R.id.nav_wallet:
                 progressDialog.show();
+                loadSite("https://mwallet.burst-team.us:8125/index.html");
+
+                /*
                 mWebView.setWebViewClient(new WebViewClient(){
                     @Override
                     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
@@ -158,6 +149,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 });
                 mWebView.loadUrl("https://mwallet.burst-team.us:8125/index.html");
+                */
                 // fragmentClass = ThirdFragment.class;
                 isAtHome=true;
                 break;
@@ -497,4 +489,81 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         selectDrawerItem(item);
         return true;
     }
+
+    // Generic Site Loader for the mainWebView portion
+    private void loadSite(String url){
+        WebSettings webSettings = mWebView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setDomStorageEnabled(true);
+        //webSettings.setAppCacheEnabled(false);
+        //webSettings.setLoadWithOverviewMode(true);
+
+        mWebView.loadUrl(url);
+        mWebView.addJavascriptInterface(new JSInterface(), "Android");
+        mWebView.setWebViewClient(new WebViewClient(){
+        //mWebView.setWebChromeClient(new WebChromeClient(){
+            @SuppressWarnings("deprecation")
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                if((burstID.isEmpty() || burstID.contains("No Name Set")) && url.contains("index.html")) {
+
+                    // This throw an error in the WebView Console: I/chromium: [INFO:CONSOLE(1)] "Uncaught TypeError: undefined is not a function", source:  (1)
+                    // Has something to do with the MutationObserver function calls
+                    String s =
+                            "javascript:var options = {subtree: true, childList: true, attributes: true, characterData: true};" +
+                            "var account = document.getElementByID('account_id');" +
+                            "var observer = new MutationObserver( function(mutations) {" +
+                              "mutations.forEach(function (mutation) {" +
+                                //"window.Android.getBurstID('sample');" +
+                              "})" +
+                            "});" +
+                            "observer.observe(account, options);";
+
+
+                    // This simple line below works
+                    //s = "javascript:window.Android.getBurstID(\"some text\");";
+
+                    Log.d(TAG, "ScriptWas:"+s);
+
+                    // OnChange can not monitor a innerHTML, it's textarea and input types
+                    //String s = "javascript:document.getElementById('account_id').addEventListener('change',window.Android.getBurstID(document.getElementById('account_id').innerHTML))";
+
+                    mWebView.loadUrl(s);
+                }
+                progressDialog.cancel();
+            }
+
+            /*
+            @SuppressWarnings("deprecation")
+            @Override
+            public WebResourceResponse shouldInterceptRequest (final WebView view, String url) {
+                if (url.contains("index.html")) {
+                    //return new WebResourceResponse("text/html", "UTF-8", new FileInputStream("local_url")));
+
+                } else {
+                    return super.shouldInterceptRequest(view, url);
+                }
+            }*/
+
+            /*
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                //if ( burstID.isEmpty()) {  // url.contains("index.html")&&
+                    // document.getElementById ( "tdid" ).innerText
+                    //<div style="margin-bottom:5px;"><a href="#" id="account_name" data-toggle="modal" data-target="#account_info_modal" data-i18n="no_name_set">No Name Set</a></div>
+                Log.d(TAG, "Adding JSInterface");
+                //mWebView.loadUrl("javascript:window.Android.getBurstID(document.getElementsByTagName('account_name').innerHTML);");
+                //mWebView.loadUrl("javascript:window.Android.getBurstID('STRING OF DATA');");
+                    // getBurstID
+                mWebView.loadUrl("javascript:window.HTMLOUT.processHTML('<head>'+document.getElementsByTagName('html')[0].innerHTML+'</head>');");
+                return true;
+                //}
+             //return false;
+            }
+            */
+        });
+    }
 }
+
+
