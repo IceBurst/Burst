@@ -88,7 +88,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
         String url = "https://mwallet.burst-team.us:8125/index.html";
-        loadSite(url);
+        String jsInjection =
+                "javascript:var options = {subtree: true, childList: true, attributes: true, characterData: true};" +
+                        "try { " +
+                        "var account = $('#account_id')[0];" + // + dashboard_message
+                        "var observer = new MutationObserver( function(mutations) {" +
+                        "mutations.forEach(function (mutation) {" +
+                        "Android.getBurstID(account.innerHTML);" +
+                        "})" +
+                        "});" +
+                        "observer.observe(account, options);" +
+                        "} catch (err) { Android.getBurstID('error:' + err) }";
+
+        loadSite(url, jsInjection);
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -114,7 +126,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             case R.id.nav_wallet:
                 progressDialog.show();
-                loadSite("https://mwallet.burst-team.us:8125/index.html");
+                String jsInjectionWallet =
+                        "javascript:var options = {subtree: true, childList: true, attributes: true, characterData: true};" +
+                                "try { " +
+                                "var account = $('#account_id')[0];" + // + dashboard_message
+                                "var observer = new MutationObserver( function(mutations) {" +
+                                "mutations.forEach(function (mutation) {" +
+                                "Android.getBurstID(account.innerHTML);" +
+                                "})" +
+                                "});" +
+                                "observer.observe(account, options);" +
+                                "} catch (err) { Android.getBurstID('error:' + err) }";
+
+                loadSite("https://mwallet.burst-team.us:8125/index.html", jsInjectionWallet);
 
                 /*
                 mWebView.setWebViewClient(new WebViewClient(){
@@ -335,21 +359,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             case R.id.fauet:
                 progressDialog.show();
-                mWebView.loadUrl("http://faucet.burst-team.us");
-                mWebView.setWebViewClient(new WebViewClient(){
-                    @Override
-                    public void onPageFinished(WebView view, String url) {
-                        super.onPageFinished(view, url);
-                        progressDialog.cancel();
-                    }
-
-                });
+                String url = "https://faucet.burst-team.us";
+                if(!burstID.isEmpty()) {
+                    String jsInjectionFaucet = "javascript: (function(){document.getElementById('accountId').value='"+burstID+"';})();";
+                    loadSite(url, jsInjectionFaucet);
+                } else {
+                    loadSite(url);
+                }
                 isAtHome=false;
                 // fragmentClass = ThirdFragment.class;
                 break;
 
             case R.id.nav_plotting:
-                    Toast.makeText(getApplicationContext(),"Not implemented yet. Under development",Toast.LENGTH_LONG).show();
+                    if (burstID.isEmpty())
+                        Toast.makeText(getApplicationContext(),"Please login so we can obtain your Burst ID",Toast.LENGTH_LONG).show();
+                    else if (numericID.isEmpty()){
+                        Toast.makeText(getApplicationContext(),"Please login so we can obtain your numeric ID for plotting",Toast.LENGTH_LONG).show();
+                    } else {
+                        // Show plotting Activity
+                    }
                 break;
 
             case R.id.nav_mining:
@@ -495,12 +523,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    // Generic Site Loader for the mainWebView portion
+    // Generic Site Loader Prototype
     private void loadSite(String url){
+        loadSite(url, "");
+    }
+
+    // Generic Site Loader Final with JSInjection
+    private void loadSite(String url, final String jsInjection) {
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
-
         mWebView.loadUrl(url);
         mWebView.addJavascriptInterface(new JSInterface((IntProvider)this), "Android");
         mWebView.setWebViewClient(new WebViewClient(){
@@ -508,22 +540,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                if(burstID.isEmpty()  && url.contains("https://mwallet.burst-team.us:8125/index.html")) {
-                    String s =
-                            "javascript:var options = {subtree: true, childList: true, attributes: true, characterData: true};" +
-                            "try { " +
-                              "var account = $('#account_id')[0];" + // + dashboard_message
-                                 "var observer = new MutationObserver( function(mutations) {" +
-                                   "mutations.forEach(function (mutation) {" +
-                                     "Android.getBurstID(account.innerHTML);" +
-                                   "})" +
-                                 "});" +
-                                 "observer.observe(account, options);" +
-                            "} catch (err) { Android.getBurstID('error:' + err) }";
-
-                    //Log.d(TAG, "ScriptWas:"+s);
-                    mWebView.loadUrl(s);
-                }
+                Log.d(TAG, "ScriptWas:"+jsInjection);
+                if (!jsInjection.isEmpty())
+                    mWebView.loadUrl(jsInjection);
+                //else
+                //    mWebView.loadUrl(url);
                 progressDialog.cancel();
             }
         });
