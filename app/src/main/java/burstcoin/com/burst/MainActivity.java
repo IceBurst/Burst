@@ -6,6 +6,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.database.sqlite.SQLiteDatabase;
@@ -40,7 +41,6 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, IntProvider {
 
-
     DatabaseHandler databaseHandler;
     SQLiteDatabase sqLiteDatabase;
     private GoogleApiClient client;
@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private String numericID = "";
     //Toolbar toolbar;
 
+    public final static String NUMERICID = "burstcoin.com.burst.NUMERICID";
     private final String TAG = "MainActivity";
 
     @Override
@@ -86,12 +87,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         mWebView = (WebView) findViewById(R.id.activity_main_webview);
 
-
         String url = "https://mwallet.burst-team.us:8125/index.html";
         String jsInjection =
                 "javascript:var options = {subtree: true, childList: true, attributes: true, characterData: true};" +
                         "try { " +
-                        "var account = $('#account_id')[0];" + // + dashboard_message
+                        "var account = $('#account_id')[0];" +
                         "var observer = new MutationObserver( function(mutations) {" +
                         "mutations.forEach(function (mutation) {" +
                         "Android.getBurstID(account.innerHTML);" +
@@ -139,31 +139,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 "} catch (err) { Android.getBurstID('error:' + err) }";
 
                 loadSite("https://mwallet.burst-team.us:8125/index.html", jsInjectionWallet);
-
-                /*
-                mWebView.setWebViewClient(new WebViewClient(){
-                    @Override
-                    public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-                        if (url.contains("index")) {
-                            // Put in our handler here
-
-                            // move else
-                            //return getCssWebResourceResponseFromAsset();
-                        } //else {
-                        return super.shouldInterceptRequest(view, url);
-                        //}
-                    }
-
-                    @Override
-                    public void onPageFinished(WebView view, String url) {
-                        super.onPageFinished(view, url);
-                        progressDialog.cancel();
-                    }
-
-                });
-                mWebView.loadUrl("https://mwallet.burst-team.us:8125/index.html");
-                */
-                // fragmentClass = ThirdFragment.class;
                 isAtHome=true;
                 break;
             case R.id.save_passphrase:
@@ -376,7 +351,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     else if (numericID.isEmpty()){
                         Toast.makeText(getApplicationContext(),"Please login so we can obtain your numeric ID for plotting",Toast.LENGTH_LONG).show();
                     } else {
-                        // Show plotting Activity
+                        // Lets just throw something up
+                        Intent plotIntent = new Intent(this, PlotterActivity.class);
+                        plotIntent.putExtra(NUMERICID, numericID);
+                        startActivity(plotIntent);
+                        isAtHome=false;
                     }
                 break;
 
@@ -387,6 +366,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         x.getNumericIDFromBurstID(burstID, this);
 
                     //    Toast.makeText(getApplicationContext(),"Not implemented yet. Under development",Toast.LENGTH_LONG).show();
+                    isAtHome=false;
                 break;
 
             default:
@@ -409,6 +389,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case "GOTBURSTID":
                 if (args[1].contains("SUCCESS"))
                     this.burstID = args[2];
+                    BurstUtil fetchNumericID = new BurstUtil((IntProvider)this);
+                    fetchNumericID.getNumericIDFromBurstID(burstID, this);
                 break;
             case "GOTNUMERICID":
                 if (args[1].contains("SUCCESS"))

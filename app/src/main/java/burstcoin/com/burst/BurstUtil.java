@@ -1,20 +1,28 @@
 package burstcoin.com.burst;
 
 import android.annotation.TargetApi;
+import android.app.ActivityManager;
 import android.content.Context;
+import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
+import android.text.TextUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Created by IceBurst on 7/6/2016.
@@ -26,11 +34,16 @@ import java.text.DecimalFormat;
 @TargetApi(18)
 public class BurstUtil {
     static String TAG = "BurstTools";
+    private static final Pattern DIR_SEPORATOR = Pattern.compile("/");
+
     private IntProvider provider;
 
     public BurstUtil(IntProvider c) {
         this.provider = c;
     }
+
+    public BurstUtil() {}
+
     // ToDo: Requires Testing
     // Could be very useful for setting up plot sizes
     // Query and return the amount of freespace on the SD card in nounces
@@ -66,17 +79,23 @@ public class BurstUtil {
     }
 
     // ToDo: Testing 8-July on Hardware, return .51 <-- Is This correct for a simulated SD, thought it should be 2GB?
+    // We are looking internal memory that is registering as External, need to fix this some how, we only want real SD cards
     // We Get these results with no card as well!!
     public static double getTotalSpaceInGB() {
         String state = Environment.getExternalStorageState();
+        String[] mCards = getStorageDirectories();
+        //File mStoragePath = Environment.getExternalStorageDirectory();
+        // isExternalStorageRemovable comes back false, thats how we know this is the wrong memory space.
         if (Environment.MEDIA_MOUNTED.equals(state) ||
                 Environment.MEDIA_MOUNTED_READ_ONLY.equals(state) )
         {
             // We can read or write the media
-            StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
+            // This below is Bad, we need to write something more elegant
+            StatFs stat = new StatFs(mCards[0]); // new File("/sdcard/"
             long megsAvailable = (long)stat.getTotalBytes() / 1048576;
             DecimalFormat roundingFormat = new DecimalFormat("#.##");
             roundingFormat.setRoundingMode(RoundingMode.DOWN);
+            //  getExternalFilesDir(null)
             return Double.parseDouble(roundingFormat.format(((double)megsAvailable / (double)1024)));
         }
         else
@@ -141,4 +160,89 @@ public class BurstUtil {
         };
         jsonCall.execute(burstID);
     }
+
+    // Get the Free Memory on the device
+    public long getFreeMemoryInMB(Context c) {
+        ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
+        ActivityManager activityManager = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
+        activityManager.getMemoryInfo(mi);
+        return mi.availMem / 1048576L;
+    }
+
+    // Get total memory on the device less the kernel
+    public long getTotalMemoryInMB(Context c) {
+        ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
+        ActivityManager activityManager = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
+        activityManager.getMemoryInfo(mi);
+        return mi.totalMem / 1048576L;
+    }
+
+    public static String[] getStorageDirectories()
+    {
+        // Final set of paths
+        final Set<String> rv = new HashSet<String>();
+        // Primary physical SD-CARD (not emulated)
+        final String rawExternalStorage = System.getenv("EXTERNAL_STORAGE");
+        // All Secondary SD-CARDs (all exclude primary) separated by ":"
+        final String rawSecondaryStoragesStr = System.getenv("SECONDARY_STORAGE");
+        // Primary emulated SD-CARD
+        final String rawEmulatedStorageTarget = System.getenv("EMULATED_STORAGE_TARGET");
+        if(TextUtils.isEmpty(rawEmulatedStorageTarget))
+        {
+            // Device has physical external storage; use plain paths.
+            if(TextUtils.isEmpty(rawExternalStorage))
+            {
+                // EXTERNAL_STORAGE undefined; falling back to default.
+                rv.add("/storage/sdcard0");
+            }
+            else
+            {
+                rv.add(rawExternalStorage);
+            }
+        }
+        else
+        {
+            // Device has emulated storage; external storage paths should have
+            // userId burned into them.
+            final String rawUserId;
+            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1)
+            {
+                rawUserId = "";
+            }
+            else
+            {
+                final String path = Environment.getExternalStorageDirectory().getAbsolutePath();
+                final String[] folders = DIR_SEPORATOR.split(path);
+                final String lastFolder = folders[folders.length - 1];
+                boolean isDigit = false;
+                try
+                {
+                    Integer.valueOf(lastFolder);
+                    isDigit = true;
+                }
+                catch(NumberFormatException ignored)
+                {
+                }
+                rawUserId = isDigit ? lastFolder : "";
+            }
+            // /storage/emulated/0[1,2,...]
+            if(TextUtils.isEmpty(rawUserId))
+            {
+                rv.add(rawEmulatedStorageTarget);
+            }
+            else
+            {
+                rv.add(rawEmulatedStorageTarget + File.separator + rawUserId);
+            }
+        }
+        // Add all secondary storages
+        if(!TextUtils.isEmpty(rawSecondaryStoragesStr))
+        {
+            // All Secondary SD-CARDs splited into array
+            final String[] rawSecondaryStorages = rawSecondaryStoragesStr.split(File.pathSeparator);
+            Collections.addAll(rv, rawSecondaryStorages);
+        }
+        return rv.toArray(new String[rv.size()]);
+    }
+
 }
