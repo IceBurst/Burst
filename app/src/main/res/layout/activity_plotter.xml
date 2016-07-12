@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="burstcoin.com.burst.PlotterActivity"
+    android:theme="@style/AppTheme.AppBarOverlay"
+    android:background="@color/background_floating_material_dark">
+
+    <TextView
+        android:layout_width="387dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="@android:style/TextAppearance.Large"
+        android:text="Plots"
+        android:id="@+id/txtTitlePlots"
+        android:layout_weight="0.03"
+        android:layout_gravity="top"
+        android:layout_marginTop="5dp"
+        android:textAlignment="center"
+        android:theme="@style/AppTheme.AppBarOverlay" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Storage Information"
+        android:id="@+id/txtDriveLabel"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:layout_marginTop="23dp"
+        android:layout_below="@+id/txtTitlePlots"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="X.XXGB Free Of X.XXGB Total"
+        android:id="@+id/txtDriveInfo"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:layout_below="@+id/txtDriveLabel"
+        android:layout_centerHorizontal="true"/>
+
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/barDriveUseage"
+        android:minHeight="60dip"
+        android:maxHeight="60dip"
+        android:progressTint="#65e433"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_below="@+id/txtDriveInfo"
+        android:layout_alignLeft="@+id/txtDriveInfo"
+        android:layout_alignStart="@+id/txtDriveInfo"
+        android:layout_alignRight="@+id/txtDriveInfo"
+        android:layout_alignEnd="@+id/txtDriveInfo" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Drive Message Holder"
+        android:id="@+id/txtDriveMessage"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:layout_below="@+id/barDriveUseage"
+        android:layout_centerHorizontal="true" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Test Data Goes Here"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/txtTestHolder"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:layout_below="@+id/btnDeletePlot"
+        android:layout_alignLeft="@+id/txtDriveLabel"
+        android:layout_alignStart="@+id/txtDriveLabel" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Done"
+        android:id="@+id/btnDone"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="26dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:singleLine="false"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        style="@style/AppTheme.AppBarOverlay"
+        android:background="@color/colorAccent" />
+
+    <SeekBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/seekBar"
+        android:layout_below="@+id/txtDriveMessage"
+        android:layout_alignLeft="@+id/barDriveUseage"
+        android:layout_alignStart="@+id/barDriveUseage"
+        android:layout_alignRight="@+id/barDriveUseage"
+        android:layout_alignEnd="@+id/barDriveUseage" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Plot xGB"
+        android:id="@+id/txtPlotGBSize"
+        android:layout_below="@+id/seekBar"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Delete a 1GB Plot"
+        android:id="@+id/btnDeletePlot"
+        android:layout_gravity="center_horizontal|bottom"
+        android:singleLine="false"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        style="@style/AppTheme.AppBarOverlay"
+        android:background="@color/colorAccent"
+        android:layout_below="@+id/textView2"
+        android:layout_marginTop="25dp"
+        android:layout_alignLeft="@+id/txtTestHolder"
+        android:layout_alignStart="@+id/txtTestHolder"
+        android:layout_alignRight="@+id/txtDriveLabel"
+        android:layout_alignEnd="@+id/txtDriveLabel" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Plot"
+        android:id="@+id/button"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:background="@color/colorAccent"
+        android:layout_centerVertical="true"
+        android:layout_alignLeft="@+id/btnDone"
+        android:layout_alignStart="@+id/btnDone" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="xGB of Plots Exist"
+        android:id="@+id/textView2"
+        android:layout_below="@+id/button"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="29dp" />
+
+</RelativeLayout>
