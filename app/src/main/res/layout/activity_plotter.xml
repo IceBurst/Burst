@@ -74,8 +74,8 @@
         android:id="@+id/txtTestHolder"
         android:theme="@style/AppTheme.AppBarOverlay"
         android:layout_below="@+id/btnDeletePlot"
-        android:layout_alignLeft="@+id/txtDriveLabel"
-        android:layout_alignStart="@+id/txtDriveLabel" />
+        android:layout_alignLeft="@+id/txtDriveLabel"/>
+        <!--android:layout_alignStart="@+id/txtDriveLabel"-->
 
     <Button
         android:layout_width="wrap_content"
@@ -134,7 +134,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Plot"
-        android:id="@+id/button"
+        android:id="@+id/btnPlot"
         android:theme="@style/AppTheme.AppBarOverlay"
         android:background="@color/colorAccent"
         android:layout_centerVertical="true"
@@ -149,7 +149,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="xGB of Plots Exist"
         android:id="@+id/textView2"
-        android:layout_below="@+id/button"
+        android:layout_below="@+id/btnPlot"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="29dp" />
 

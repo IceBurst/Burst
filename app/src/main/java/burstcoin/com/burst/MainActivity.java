@@ -395,6 +395,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case "GOTNUMERICID":
                 if (args[1].contains("SUCCESS"))
                     this.numericID = args[2];
+                else
+                    this.numericID = "";
                 break;
         }
 

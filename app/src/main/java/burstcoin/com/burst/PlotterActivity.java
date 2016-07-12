@@ -1,5 +1,6 @@
 package burstcoin.com.burst;
 
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -12,7 +13,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.TreeMap;
 
-public class PlotterActivity extends AppCompatActivity {
+public class PlotterActivity extends AppCompatActivity implements IntProvider{
 
     private Plotter plotter;
 
@@ -22,33 +23,46 @@ public class PlotterActivity extends AppCompatActivity {
     private TextView mTxtDriveMessage;
     private TextView mTxtDrivePlotSize;
     private Button mBtnDone;
+    private Button mBtnPlot;
+    private Button mBtnDeletePlot;
     private SeekBar mSizeBar;
 
     private String numericID;
     private double mTotalSpace = 0;
     private double mFreeSpace = 0;
     private final static String TAG = "PlotterActivity";
+    private Plotter mPlotter = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_plotter);
         numericID = getIntent().getStringExtra(MainActivity.NUMERICID);
+        mPlotter = new Plotter(this, numericID);
 
         // Enable the Done button
         mBtnDone = (Button) findViewById(R.id.btnDone);
-        mBtnDone.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-               finish();
-            }
-        });
-
+        mBtnPlot = (Button) findViewById(R.id.btnPlot);
+        mBtnDeletePlot = (Button) findViewById(R.id.btnDeletePlot);
         mSizeBar = (SeekBar) findViewById(R.id.setPlotSize);
         mTxtDriveInfo =  (TextView) findViewById(R.id.txtDriveInfo);
         mTxtDriveMessage =  (TextView) findViewById(R.id.txtDriveMessage);
         mTxtDrivePlotSize = (TextView) findViewById(R.id.txtPlotGBSize);
         mTxtTest = (TextView) findViewById(R.id.txtTestHolder);
+
+        mBtnPlot.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPlotter.brutalTestPlot();
+            }
+        });
+
+        mBtnDone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         // Lets update the Screen with current System/Plot Information
         updateDriveInfo();
@@ -68,12 +82,13 @@ public class PlotterActivity extends AppCompatActivity {
             }
 
             @Override
-
             public void onStopTrackingTouch(SeekBar seekBar) {
                 mTxtDrivePlotSize.setText("Plot "+Integer.toString(progress)+"GB");
             }
-
         });
+
+
+        //brutalTestPlot
 
         // below here is all pilot code that is a work in progress
 
@@ -111,10 +126,16 @@ public class PlotterActivity extends AppCompatActivity {
     // Try to target for 512mb of RAM, less is OK
 
     private void updateDriveMessage() {
-        if (mFreeSpace < 1)
+        if (mFreeSpace < 1) {
             mTxtDriveMessage.setText("Not Enough Space to Plot");
-        else
+            mBtnPlot.setEnabled(false);
+            mBtnPlot.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+        }
+        else {
             mTxtDriveMessage.setText("");
+            mBtnPlot.setEnabled(true);
+            mBtnPlot.setBackgroundColor(Color.DKGRAY);  // ToDo: this didn't become darkGry
+        }
     }
 
     private void updateCurrentPlotInfo() {
@@ -140,5 +161,10 @@ public class PlotterActivity extends AppCompatActivity {
     // Things to Implement in the future
     //Plotter p = new Plotter(this);
     //p.plot1GB();
+
+    @Override
+    public void notice(String... args){
+        // This is how we get data back from the Plotter Tool
+    }
 
 }

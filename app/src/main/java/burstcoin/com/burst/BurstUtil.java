@@ -66,7 +66,7 @@ public class BurstUtil {
         {
             // We can read and write the media
             //StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
-            StatFs stat = new StatFs(mCards[0]);
+            StatFs stat = new StatFs("/mnt/sdcard");
             long bytesAvailable = (long)stat.getAvailableBytes();
             long megsAvailable = bytesAvailable / 1048576;
             DecimalFormat roundingFormat = new DecimalFormat("#.##");
@@ -102,7 +102,7 @@ public class BurstUtil {
             }
             if (mCards.length == 0)         // added 12-July-2016, incase there is no valid cards
                 return 0;
-            StatFs stat = new StatFs(mCards[0]);        // new File("/sdcard/", reported by emulator
+            StatFs stat = new StatFs("/mnt/sdcard");        // new File("/sdcard/", reported by emulator
             long megsAvailable = (long)stat.getTotalBytes() / 1048576;
             DecimalFormat roundingFormat = new DecimalFormat("#.##");
             roundingFormat.setRoundingMode(RoundingMode.DOWN);
@@ -151,7 +151,9 @@ public class BurstUtil {
     // Get Burst NumericID from Online API
     public void getNumericIDFromBurstID(final String burstID, final Context context) {
 
-        String URL = "https://wallet.burst-team.us:8125/burst?requestType=rsConvert&account=" + burstID;
+        //String URL = "https://wallet.burst-team.us:8125/burst?requestType=rsConvert&account=" + burstID;
+        // ToDo: Have someone look at why SSL is failing starting in 12-July
+        String URL = "http://util.burst-team.us:8080/burst?requestType=rsConvert&account=" + burstID;
 
         GetAsync jsonCall = new GetAsync(URL) {
             @Override
