@@ -85,16 +85,19 @@
         android:layout_gravity="center_horizontal|bottom"
         android:layout_marginBottom="26dp"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
         android:singleLine="false"
         android:theme="@style/AppTheme.AppBarOverlay"
         style="@style/AppTheme.AppBarOverlay"
-        android:background="@color/colorAccent" />
+        android:background="@color/colorAccent"
+        android:layout_alignLeft="@+id/txtTestHolder"
+        android:layout_alignStart="@+id/txtTestHolder"
+        android:layout_alignRight="@+id/btnDeletePlot"
+        android:layout_alignEnd="@+id/btnDeletePlot" />
 
     <SeekBar
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/seekBar"
+        android:id="@+id/setPlotSize"
         android:layout_below="@+id/txtDriveMessage"
         android:layout_alignLeft="@+id/barDriveUseage"
         android:layout_alignStart="@+id/barDriveUseage"
@@ -105,9 +108,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Plot xGB"
+        android:text="Plot 0GB"
         android:id="@+id/txtPlotGBSize"
-        android:layout_below="@+id/seekBar"
+        android:layout_below="@+id/setPlotSize"
         android:layout_centerHorizontal="true" />
 
     <Button
@@ -135,8 +138,10 @@
         android:theme="@style/AppTheme.AppBarOverlay"
         android:background="@color/colorAccent"
         android:layout_centerVertical="true"
-        android:layout_alignLeft="@+id/btnDone"
-        android:layout_alignStart="@+id/btnDone" />
+        android:layout_alignLeft="@+id/btnDeletePlot"
+        android:layout_alignStart="@+id/btnDeletePlot"
+        android:layout_alignRight="@+id/btnDeletePlot"
+        android:layout_alignEnd="@+id/btnDeletePlot" />
 
     <TextView
         android:layout_width="wrap_content"

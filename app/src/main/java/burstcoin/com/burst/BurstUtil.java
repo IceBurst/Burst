@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
 import android.text.TextUtils;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,10 +58,12 @@ public class BurstUtil {
     // Return Free space in GB to show on Plotting Screen
     public static double getFreeSpaceInGB() {
         String state = Environment.getExternalStorageState();
+        String[] mCards = getStorageDirectories();
         if (Environment.MEDIA_MOUNTED.equals(state))
         {
             // We can read and write the media
-            StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
+            //StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
+            StatFs stat = new StatFs(mCards[0]);
             long bytesAvailable = (long)stat.getAvailableBytes();
             long megsAvailable = bytesAvailable / 1048576;
             DecimalFormat roundingFormat = new DecimalFormat("#.##");
@@ -91,6 +94,9 @@ public class BurstUtil {
         {
             // We can read or write the media
             // This below is Bad, we need to write something more elegant
+            for (String path : mCards) {
+                Log.d(TAG, path);
+            }
             StatFs stat = new StatFs(mCards[0]); // new File("/sdcard/"
             long megsAvailable = (long)stat.getTotalBytes() / 1048576;
             DecimalFormat roundingFormat = new DecimalFormat("#.##");

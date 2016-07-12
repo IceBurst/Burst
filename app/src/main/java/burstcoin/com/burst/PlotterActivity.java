@@ -5,8 +5,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.TreeMap;
 
 public class PlotterActivity extends AppCompatActivity {
@@ -17,7 +20,9 @@ public class PlotterActivity extends AppCompatActivity {
     private TextView mTxtDriveInfo;
     private TextView mTxtTest;
     private TextView mTxtDriveMessage;
+    private TextView mTxtDrivePlotSize;
     private Button mBtnDone;
+    private SeekBar mSizeBar;
 
     private String numericID;
     private double mTotalSpace = 0;
@@ -39,15 +44,39 @@ public class PlotterActivity extends AppCompatActivity {
             }
         });
 
-        // Lets update the Screen with current System/Plot Information
+        mSizeBar = (SeekBar) findViewById(R.id.setPlotSize);
         mTxtDriveInfo =  (TextView) findViewById(R.id.txtDriveInfo);
+        mTxtDriveMessage =  (TextView) findViewById(R.id.txtDriveMessage);
+        mTxtDrivePlotSize = (TextView) findViewById(R.id.txtPlotGBSize);
+        mTxtTest = (TextView) findViewById(R.id.txtTestHolder);
+
+        // Lets update the Screen with current System/Plot Information
         updateDriveInfo();
 
-        mTxtDriveMessage =  (TextView) findViewById(R.id.txtDriveMessage);
         updateDriveMessage();
+        mSizeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int progress;
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progressValue, boolean fromUser) {
+                progress = progressValue;
+                //Toast.makeText(getApplicationContext(), "Changing seekbar's progress", Toast.LENGTH_SHORT).show();
+                mTxtDrivePlotSize.setText("Plot "+Integer.toString(progress)+"GB");
+            }
+
+            @Override
+
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                mTxtDrivePlotSize.setText("Plot "+Integer.toString(progress)+"GB");
+            }
+
+        });
 
         // below here is all pilot code that is a work in progress
-        mTxtTest = (TextView) findViewById(R.id.txtTestHolder);
+
         String mFreeMem = Long.toString(new BurstUtil().getFreeMemoryInMB(this));
         String mTotalMem = Long.toString(new BurstUtil().getTotalMemoryInMB(this));
         mTxtTest.setText("Free Memory "+mFreeMem+"MB of "+mTotalMem+"MB");
@@ -67,10 +96,16 @@ public class PlotterActivity extends AppCompatActivity {
         mTxtDriveInfo.setText(mStringFreeSpace+"GB Free of "+ mStringTotalSpace+"GB Total");
         ProgressBar mProgressBar = (ProgressBar) findViewById(R.id.barDriveUseage);
         // Just Trying this out
-        mProgressBar.setMax((int)8);
-        mProgressBar.setProgress((int)2);
+        mProgressBar.setMax((int)(mTotalSpace*100));
+        mProgressBar.setProgress((int)((mTotalSpace-mFreeSpace)*100));
         //android:max
         //android:progress
+        DecimalFormat roundingFormat = new DecimalFormat("#");
+        roundingFormat.setRoundingMode(RoundingMode.DOWN);
+
+        // Set the Max Slider to the Max Round Down free GB
+
+        mSizeBar.setMax(Integer.parseInt(roundingFormat.format(mFreeSpace)));
     }
     // Best Memory sizes for plotting are things that break nicely into 1GB, powers of 2.
     // Try to target for 512mb of RAM, less is OK
