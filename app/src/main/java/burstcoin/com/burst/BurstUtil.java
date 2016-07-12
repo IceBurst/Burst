@@ -59,6 +59,9 @@ public class BurstUtil {
     public static double getFreeSpaceInGB() {
         String state = Environment.getExternalStorageState();
         String[] mCards = getStorageDirectories();
+        if (mCards.length == 0)         // added 12-July-2016, incase there is no valid cards
+            return 0;
+
         if (Environment.MEDIA_MOUNTED.equals(state))
         {
             // We can read and write the media
@@ -95,9 +98,11 @@ public class BurstUtil {
             // We can read or write the media
             // This below is Bad, we need to write something more elegant
             for (String path : mCards) {
-                Log.d(TAG, path);
+                Log.d(TAG, path);           // This is just a diagnostic to check for SD Card paths
             }
-            StatFs stat = new StatFs(mCards[0]); // new File("/sdcard/"
+            if (mCards.length == 0)         // added 12-July-2016, incase there is no valid cards
+                return 0;
+            StatFs stat = new StatFs(mCards[0]);        // new File("/sdcard/", reported by emulator
             long megsAvailable = (long)stat.getTotalBytes() / 1048576;
             DecimalFormat roundingFormat = new DecimalFormat("#.##");
             roundingFormat.setRoundingMode(RoundingMode.DOWN);
