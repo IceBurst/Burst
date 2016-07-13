@@ -69,12 +69,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Test Data Goes Here"
-        android:layout_centerHorizontal="true"
+        android:text="Free Memory xxMB of xxMB"
         android:id="@+id/txtTestHolder"
         android:theme="@style/AppTheme.AppBarOverlay"
         android:layout_below="@+id/btnDeletePlot"
-        android:layout_alignLeft="@+id/txtDriveLabel"/>
+        android:layout_centerHorizontal="true" />
+    <!--  -->
         <!--android:layout_alignStart="@+id/txtDriveLabel"-->
 
     <Button
@@ -89,10 +89,10 @@
         android:theme="@style/AppTheme.AppBarOverlay"
         style="@style/AppTheme.AppBarOverlay"
         android:background="@color/colorAccent"
-        android:layout_alignLeft="@+id/txtTestHolder"
-        android:layout_alignStart="@+id/txtTestHolder"
         android:layout_alignRight="@+id/btnDeletePlot"
-        android:layout_alignEnd="@+id/btnDeletePlot" />
+        android:layout_alignEnd="@+id/btnDeletePlot"
+        android:layout_alignLeft="@+id/btnDeletePlot"
+        android:layout_alignStart="@+id/btnDeletePlot" />
 
     <SeekBar
         android:layout_width="wrap_content"
@@ -125,10 +125,10 @@
         android:background="@color/colorAccent"
         android:layout_below="@+id/textView2"
         android:layout_marginTop="25dp"
-        android:layout_alignLeft="@+id/txtTestHolder"
-        android:layout_alignStart="@+id/txtTestHolder"
         android:layout_alignRight="@+id/txtDriveLabel"
-        android:layout_alignEnd="@+id/txtDriveLabel" />
+        android:layout_alignEnd="@+id/txtDriveLabel"
+        android:layout_alignLeft="@+id/txtDriveMessage"
+        android:layout_alignStart="@+id/txtDriveMessage" />
 
     <Button
         android:layout_width="wrap_content"
@@ -138,10 +138,10 @@
         android:theme="@style/AppTheme.AppBarOverlay"
         android:background="@color/colorAccent"
         android:layout_centerVertical="true"
-        android:layout_alignLeft="@+id/btnDeletePlot"
-        android:layout_alignStart="@+id/btnDeletePlot"
         android:layout_alignRight="@+id/btnDeletePlot"
-        android:layout_alignEnd="@+id/btnDeletePlot" />
+        android:layout_alignEnd="@+id/btnDeletePlot"
+        android:layout_alignLeft="@+id/txtDriveMessage"
+        android:layout_alignStart="@+id/txtDriveMessage" />
 
     <TextView
         android:layout_width="wrap_content"

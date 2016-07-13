@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.widget.AppCompatButton;
@@ -88,18 +89,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mWebView = (WebView) findViewById(R.id.activity_main_webview);
 
         String url = "https://mwallet.burst-team.us:8125/index.html";
-        String jsInjection =
-                "javascript:var options = {subtree: true, childList: true, attributes: true, characterData: true};" +
-                        "try { " +
-                        "var account = $('#account_id')[0];" +
-                        "var observer = new MutationObserver( function(mutations) {" +
-                        "mutations.forEach(function (mutation) {" +
-                        "Android.getBurstID(account.innerHTML);" +
-                        "})" +
-                        "});" +
-                        "observer.observe(account, options);" +
-                        "} catch (err) { Android.getBurstID('error:' + err) }";
-
+        String jsInjection = "";
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            // This Injection Does not work on API 16 (MutationObserver DNE)
+            jsInjection =
+                    "javascript:var options = {subtree: true, childList: true, attributes: true, characterData: true};" +
+                            "try { " +
+                            "var account = $('#account_id')[0];" +
+                            "var observer = new MutationObserver( function(mutations) {" +
+                            "mutations.forEach(function (mutation) {" +
+                            "Android.getBurstID(account.innerHTML);" +
+                            "})" +
+                            "});" +
+                            "observer.observe(account, options);" +
+                            "} catch (err) { Android.getBurstID('error:' + err) }";
+        } else {
+            jsInjection =
+                "javascript:" +
+                    "document.getElementById(\"account_id\").addEventListened(\"DOMAttrModified\", function(e) {" +
+                    "Android.getBurstID('something')" +
+                    "}, false);";
+        }
+        //MutationEvent
         loadSite(url, jsInjection);
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.

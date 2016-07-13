@@ -66,12 +66,20 @@ public class PlotterActivity extends AppCompatActivity implements IntProvider{
 
         // Lets update the Screen with current System/Plot Information
         updateDriveInfo();
-
         updateDriveMessage();
+
         mSizeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             int progress;
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
+                progress = seekBar.getProgress();
+                if(progress > 0) {
+                    mBtnPlot.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+                    mBtnPlot.setEnabled(true);
+                } else {
+                    mBtnPlot.setBackgroundColor(Color.DKGRAY);
+                    mBtnPlot.setEnabled(false);
+                }
             }
 
             @Override
@@ -112,7 +120,7 @@ public class PlotterActivity extends AppCompatActivity implements IntProvider{
         updateCurrentPlotInfo();
 
         // This might be best in the Mining Activity
-        loadMiningPools();
+        //loadMiningPools();
 
     }
 

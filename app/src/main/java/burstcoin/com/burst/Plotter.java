@@ -2,6 +2,8 @@ package burstcoin.com.burst;
 
 import android.util.Log;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 
 /**
@@ -43,8 +45,13 @@ public class Plotter {
             Log.d(TAG, "Going to Try:"+mExe);
             try {
                 Process process = Runtime.getRuntime().exec(mExe);
-            } catch (IOException e) {
+                // /data/data/burstcoin.com.burst/lib/plot32.so -k 6335396967509650518 -d /storage/sdcard -s 0 -n 400 -m 256 -t 1
+                DataOutputStream os = new DataOutputStream(process.getOutputStream());
+                DataInputStream osRes = new DataInputStream(process.getInputStream());
+                Log.d(TAG,"Exit Value:" + Integer.toString(process.exitValue()));
 
+            } catch (IOException e) {
+                e.printStackTrace();
             }
             //DataOutputStream os = new DataOutputStream(process.getOutputStream());
             //DataInputStream osRes = new DataInputStream(process.getInputStream());

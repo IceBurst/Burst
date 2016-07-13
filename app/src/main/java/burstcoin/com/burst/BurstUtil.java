@@ -100,9 +100,15 @@ public class BurstUtil {
             for (String path : mCards) {
                 Log.d(TAG, "Found Storage at:" + path);           // This is just a diagnostic to check for SD Card paths
             }
+            Log.d(TAG, "EXTERNAL_STORAGE: "+System.getenv("EXTERNAL_STORAGE"));
+            Log.d(TAG, "SECONDARY_STORAGE: "+System.getenv("SECONDARY_STORAGE") );
+
             if (mCards.length == 0)         // added 12-July-2016, in case there is no valid cards
                 return 0;
             // ToDo: Need to setup StatFS better
+            /* Test Results
+             * Running 5.1 Nexus5X Emulated with 8GB SD, worked correctly
+             */
             StatFs stat = new StatFs(mCards[0]);
             // Result Sets : Emulator @ Home Nexus 5X w/ 8GB card returned /storage/sdcard which was correct
             long megsAvailable = (long)stat.getTotalBytes() / 1048576;
