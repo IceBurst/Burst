@@ -79,11 +79,25 @@ public class PlotterActivity extends AppCompatActivity implements IntProvider{
                 progress = progressValue;
                 //Toast.makeText(getApplicationContext(), "Changing seekbar's progress", Toast.LENGTH_SHORT).show();
                 mTxtDrivePlotSize.setText("Plot "+Integer.toString(progress)+"GB");
+                if(progress > 0) {
+                    mBtnPlot.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+                    mBtnPlot.setEnabled(true);
+                } else {
+                    mBtnPlot.setBackgroundColor(Color.DKGRAY);
+                    mBtnPlot.setEnabled(false);
+                }
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 mTxtDrivePlotSize.setText("Plot "+Integer.toString(progress)+"GB");
+                if(progress > 0) {
+                    mBtnPlot.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+                    mBtnPlot.setEnabled(true);
+                } else {
+                    mBtnPlot.setBackgroundColor(Color.DKGRAY);
+                    mBtnPlot.setEnabled(false);
+                }
             }
         });
 
@@ -119,7 +133,6 @@ public class PlotterActivity extends AppCompatActivity implements IntProvider{
         roundingFormat.setRoundingMode(RoundingMode.DOWN);
 
         // Set the Max Slider to the Max Round Down free GB
-
         mSizeBar.setMax(Integer.parseInt(roundingFormat.format(mFreeSpace)));
     }
     // Best Memory sizes for plotting are things that break nicely into 1GB, powers of 2.

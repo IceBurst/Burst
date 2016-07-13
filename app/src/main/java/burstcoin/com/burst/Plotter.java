@@ -1,5 +1,7 @@
 package burstcoin.com.burst;
 
+import android.util.Log;
+
 import java.io.IOException;
 
 /**
@@ -13,6 +15,8 @@ public class Plotter {
 
     private IntProvider callback;
     private String numericID = "";
+
+    private final static String TAG = "Ploter";
 
     public Plotter (IntProvider cb, String nID) {
         this.numericID = nID;
@@ -31,7 +35,12 @@ public class Plotter {
 
             // Sample ./plot32 -k 1232353462354235 -d /storage/sdcard1/Android/data/com.termux/ -s 0 -n 10000 -m 1024 -t 4
             // My Simple Plot 1 Thread, 256MB memory, 100MB Plot
-            String mExe =  "/data/data/burstcoin.com.burst/lib/plot32.so -k "+numericID+" -d /storage/sdcard1/Android/data/com.termux/ -s 0 -n 400 -m 256 -t 1";
+            // ToDo: This will crash with the hard coded path of -d parm
+
+
+            String mExe =  "/data/data/burstcoin.com.burst/lib/plot32.so -k "+numericID+" -d "+mCards[0]+" -s 0 -n 400 -m 256 -t 1";
+
+            Log.d(TAG, "Going to Try:"+mExe);
             try {
                 Process process = Runtime.getRuntime().exec(mExe);
             } catch (IOException e) {

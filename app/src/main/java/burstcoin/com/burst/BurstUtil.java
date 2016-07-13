@@ -66,7 +66,7 @@ public class BurstUtil {
         {
             // We can read and write the media
             //StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
-            StatFs stat = new StatFs("/mnt/sdcard");
+            StatFs stat = new StatFs(mCards[0]);
             long bytesAvailable = (long)stat.getAvailableBytes();
             long megsAvailable = bytesAvailable / 1048576;
             DecimalFormat roundingFormat = new DecimalFormat("#.##");
@@ -98,11 +98,13 @@ public class BurstUtil {
             // We can read or write the media
             // This below is Bad, we need to write something more elegant
             for (String path : mCards) {
-                Log.d(TAG, path);           // This is just a diagnostic to check for SD Card paths
+                Log.d(TAG, "Found Storage at:" + path);           // This is just a diagnostic to check for SD Card paths
             }
-            if (mCards.length == 0)         // added 12-July-2016, incase there is no valid cards
+            if (mCards.length == 0)         // added 12-July-2016, in case there is no valid cards
                 return 0;
-            StatFs stat = new StatFs("/mnt/sdcard");        // new File("/sdcard/", reported by emulator
+            // ToDo: Need to setup StatFS better
+            StatFs stat = new StatFs(mCards[0]);
+            // Result Sets : Emulator @ Home Nexus 5X w/ 8GB card returned /storage/sdcard which was correct
             long megsAvailable = (long)stat.getTotalBytes() / 1048576;
             DecimalFormat roundingFormat = new DecimalFormat("#.##");
             roundingFormat.setRoundingMode(RoundingMode.DOWN);
