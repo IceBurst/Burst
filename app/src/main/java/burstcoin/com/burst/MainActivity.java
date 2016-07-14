@@ -89,28 +89,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mWebView = (WebView) findViewById(R.id.activity_main_webview);
 
         String url = "https://mwallet.burst-team.us:8125/index.html";
-        String jsInjection = "";
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            // This Injection Does not work on API 16 (MutationObserver DNE)
-            jsInjection =
-                    "javascript:var options = {subtree: true, childList: true, attributes: true, characterData: true};" +
-                            "try { " +
-                            "var account = $('#account_id')[0];" +
-                            "var observer = new MutationObserver( function(mutations) {" +
-                            "mutations.forEach(function (mutation) {" +
-                            "Android.getBurstID(account.innerHTML);" +
-                            "})" +
-                            "});" +
-                            "observer.observe(account, options);" +
-                            "} catch (err) { Android.getBurstID('error:' + err) }";
-        } else {
-            jsInjection =
-                "javascript:" +
-                    "document.getElementById(\"account_id\").addEventListened(\"DOMAttrModified\", function(e) {" +
-                    "Android.getBurstID('something')" +
-                    "}, false);";
-        }
-        //MutationEvent
+        String jsInjection = createBurstJSInjection();
         loadSite(url, jsInjection);
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -137,18 +116,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             case R.id.nav_wallet:
                 progressDialog.show();
-                String jsInjectionWallet =
-                        "javascript:var options = {subtree: true, childList: true, attributes: true, characterData: true};" +
-                                "try { " +
-                                "var account = $('#account_id')[0];" + // + dashboard_message
-                                "var observer = new MutationObserver( function(mutations) {" +
-                                "mutations.forEach(function (mutation) {" +
-                                "Android.getBurstID(account.innerHTML);" +
-                                "})" +
-                                "});" +
-                                "observer.observe(account, options);" +
-                                "} catch (err) { Android.getBurstID('error:' + err) }";
-
+                String jsInjectionWallet = createBurstJSInjection();
                 loadSite("https://mwallet.burst-team.us:8125/index.html", jsInjectionWallet);
                 isAtHome=true;
                 break;
@@ -528,6 +496,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
+        /*
+        ToDo: Enhance this section by SDK Version
+        On API Level 19+, use evaluateJavascript().
+        On API Level 18 and below, use loadUrl("javascript:"),
+            using the same basic syntax used for bookmarklets on desktop browsers.
+         */
         mWebView.loadUrl(url);
         mWebView.addJavascriptInterface(new JSInterface((IntProvider)this), "Android");
         mWebView.setWebViewClient(new WebViewClient(){
@@ -543,6 +517,36 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 progressDialog.cancel();
             }
         });
+    }
+
+    private String createBurstJSInjection() {
+        String jsInjection = "";
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){    // DOM Level 4 - Android 4.4 and greater
+        jsInjection = "javascript:var options = {subtree: true, childList: true, attributes: true, characterData: true};" +
+                       "try { " +
+                         "var account = $('#account_id')[0];" +
+                         "var observer = new MutationObserver( function(mutations) {" +
+                         "mutations.forEach(function (mutation) {" +
+                           "Android.getBurstID(account.innerHTML);" +
+                         "})" +
+                       "});" +
+                       "observer.observe(account, options);" +
+                       "} catch (err) { Android.getBurstID('error:' + err) }";
+        }
+        else {        // ToDo: DOM Level 3 - MutationEvent (DOES NOT WORK YET)
+            jsInjection =
+                    "javascript:" +
+                            "Android.getBurstID('Hello');" +
+                    "try { " +
+                      "var account = document.getElementById('account_id')[0];"+
+                            "Android.getBurstID('OldAssVersion');" +    // <-- This is not ffiring
+                      "account.addEventListener('DOMCharacterDataModified', function(e) {" +  // DOMSubtreeModified or DOMAttrModified or DOMCharacterDataModified
+                        "Android.getBurstID(document.getElementById('account_id).innerHTML);" +
+                      "}, false);" +
+                    "} catch (err) { Android.getBurstID('error:' + err) " +
+                    "}";
+        }
+        return jsInjection;
     }
 }
 
