@@ -76,7 +76,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     @Override
                     public void onClick(View view) {
                         if (pin.getText().toString().equalsIgnoreCase(dataModelArrayList.get(position).getPin())) {
-                            ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(context.CLIPBOARD_SERVICE);
+                            ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
                             ClipData clipData = ClipData.newPlainText("passphrase", dataModelArrayList.get(position).getPhrase());
                             clipboardManager.setPrimaryClip(clipData);
                             Toast.makeText(context, "Your passphrase copied to clipboard.", Toast.LENGTH_LONG).show();

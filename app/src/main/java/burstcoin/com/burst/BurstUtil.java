@@ -67,7 +67,7 @@ public class BurstUtil {
             // We can read and write the media
             //StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
             StatFs stat = new StatFs(mCards[0]);
-            long bytesAvailable = (long)stat.getAvailableBytes();
+            long bytesAvailable = stat.getAvailableBytes();
             long megsAvailable = bytesAvailable / 1048576;
             DecimalFormat roundingFormat = new DecimalFormat("#.##");
             roundingFormat.setRoundingMode(RoundingMode.DOWN);
@@ -111,7 +111,7 @@ public class BurstUtil {
              */
             StatFs stat = new StatFs(mCards[0]);
             // Result Sets : Emulator @ Home Nexus 5X w/ 8GB card returned /storage/sdcard which was correct
-            long megsAvailable = (long)stat.getTotalBytes() / 1048576;
+            long megsAvailable = stat.getTotalBytes() / 1048576;
             DecimalFormat roundingFormat = new DecimalFormat("#.##");
             roundingFormat.setRoundingMode(RoundingMode.DOWN);
             //  getExternalFilesDir(null)

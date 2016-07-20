@@ -208,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     public void onClick(View view) {
 
                         if (!passphrase.getText().toString().equalsIgnoreCase("")) {
-                            ((LinearLayout) dialog.findViewById(R.id.name_layout)).setVisibility(View.VISIBLE);
+                            dialog.findViewById(R.id.name_layout).setVisibility(View.VISIBLE);
                             namephrase.requestFocus();
                         } else {
                             Toast.makeText(getApplicationContext(), "Please enter passphrase.", Toast.LENGTH_LONG).show();
@@ -224,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     @Override
                     public void onClick(View view) {
                         if (!namephrase.getText().toString().equalsIgnoreCase("")) {
-                            ((LinearLayout) dialog.findViewById(R.id.pin_layout)).setVisibility(View.VISIBLE);
+                            dialog.findViewById(R.id.pin_layout).setVisibility(View.VISIBLE);
                             pinphrase.requestFocus();
                         } else {
                             Toast.makeText(getApplicationContext(), "Please enter name for phrase.", Toast.LENGTH_LONG).show();
@@ -236,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     @Override
                     public void onClick(View view) {
                         if (!pinphrase.getText().toString().equalsIgnoreCase("")) {
-                            ((LinearLayout) dialog.findViewById(R.id.pin_reenter_layout)).setVisibility(View.VISIBLE);
+                            dialog.findViewById(R.id.pin_reenter_layout).setVisibility(View.VISIBLE);
                             reenter_pin_phrase.requestFocus();
                         } else {
                             Toast.makeText(getApplicationContext(), "Please enter pin for phrase.", Toast.LENGTH_LONG).show();
@@ -340,7 +340,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             case R.id.nav_mining:
                     // ToDo: Using this as a Cheap test button while we Design out the Mining Phase
-                    BurstUtil x = new BurstUtil((IntProvider)this);
+                    BurstUtil x = new BurstUtil(this);
                     if (!burstID.isEmpty())
                         x.getNumericIDFromBurstID(burstID, this);
 
@@ -368,7 +368,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case "GOTBURSTID":
                 if (args[1].contains("SUCCESS"))
                     this.burstID = args[2];
-                    BurstUtil fetchNumericID = new BurstUtil((IntProvider)this);
+                    BurstUtil fetchNumericID = new BurstUtil(this);
                     fetchNumericID.getNumericIDFromBurstID(burstID, this);
                 break;
             case "GOTNUMERICID":
@@ -503,7 +503,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             using the same basic syntax used for bookmarklets on desktop browsers.
          */
         mWebView.loadUrl(url);
-        mWebView.addJavascriptInterface(new JSInterface((IntProvider)this), "Android");
+        mWebView.addJavascriptInterface(new JSInterface(this), "Android");
         mWebView.setWebViewClient(new WebViewClient(){
             @SuppressWarnings("deprecation")
             @Override

@@ -15,3 +15,11 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-keep public class burstcoin.com.burst.JSInterface
+-keep public class * implements burstcoin.com.burst.JSInterface
+
+#-keepclassmembers public class * implements burstcoin.com.burst.JSInterface {
+#    getBurstID;
+#}
+

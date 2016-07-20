@@ -13,6 +13,8 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.TreeMap;
 
+import burstcoin.com.burst.burstcoin.com.burst.plotting.Plotter;
+
 public class PlotterActivity extends AppCompatActivity implements IntProvider{
 
     private Plotter plotter;
