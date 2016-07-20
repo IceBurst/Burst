@@ -3,6 +3,7 @@ package burstcoin.com.burst;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -13,11 +14,16 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.TreeMap;
 
+import burstcoin.com.burst.BurstUtil;
+import burstcoin.com.burst.IntProvider;
+import burstcoin.com.burst.MainActivity;
+import burstcoin.com.burst.PlotterActivity;
+import burstcoin.com.burst.burstcoin.com.burst.plotting.IntPlotStatus;
 import burstcoin.com.burst.burstcoin.com.burst.plotting.Plotter;
 
-public class PlotterActivity extends AppCompatActivity implements IntProvider{
+public class PlotterActivity extends AppCompatActivity implements IntPlotStatus {
 
-    private Plotter plotter;
+    //private Plotter plotter;
 
     private TreeMap<String, String> mMiningPools = null;
     private TextView mTxtDriveInfo;
@@ -40,7 +46,7 @@ public class PlotterActivity extends AppCompatActivity implements IntProvider{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_plotter);
         numericID = getIntent().getStringExtra(MainActivity.NUMERICID);
-        mPlotter = new Plotter(this, numericID);
+        mPlotter = new Plotter((IntPlotStatus)this, numericID);
 
         // Enable the Done button
         mBtnDone = (Button) findViewById(R.id.btnDone);
@@ -55,7 +61,8 @@ public class PlotterActivity extends AppCompatActivity implements IntProvider{
         mBtnPlot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mPlotter.brutalTestPlot();
+                //ToDo: Start a Wait wheel
+                mPlotter.plot1GB();
             }
         });
 
@@ -112,7 +119,7 @@ public class PlotterActivity extends AppCompatActivity implements IntProvider{
         });
 
 
-        //brutalTestPlot
+
 
         // below here is all pilot code that is a work in progress
 
@@ -181,13 +188,14 @@ public class PlotterActivity extends AppCompatActivity implements IntProvider{
         */
     }
 
-    // Things to Implement in the future
-    //Plotter p = new Plotter(this);
-    //p.plot1GB();
-
     @Override
     public void notice(String... args){
+        // some updates we get are about the plotting and when it's done
         // This is how we get data back from the Plotter Tool
+        String line="";
+        for (String s : args)
+            line+=" " + s;
+        Log.d(TAG, line);
     }
 
 }

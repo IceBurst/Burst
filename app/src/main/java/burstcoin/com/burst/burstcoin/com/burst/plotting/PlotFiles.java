@@ -23,6 +23,7 @@ public class PlotFiles {
     public PlotFiles(String path, String numericID) {
         mPath = path;
         mNumericID = numericID;
+        mPlotFiles = new ArrayList<PlotFile>();
         getPlotFiles();
     }
 
@@ -37,6 +38,16 @@ public class PlotFiles {
         getPlotFiles();
     }
 
+    /*
+    public PlotFile newPlot() {
+        // find where we need to start
+        long nextNonce = this.size() * 128; // ToDo: 128 is a place holder it should be 4096
+        PlotFile mNewPlot = new PlotFile();
+        mNewPlot.setNumericID(mNumericID);
+        mNewPlot.setStartNonce(nextNonce);
+        return mNewPlot;
+    }*/
+
     private void getPlotFiles() {
         String workingFileName = "";
         Log.d("Files", "Path: " + mPath);
@@ -48,7 +59,7 @@ public class PlotFiles {
             workingFileName = file[i].getName();
             Log.d("Files", "FileName:" + workingFileName);
             if(workingFileName.contains(mNumericID)) {
-                mPlotFiles.add(new PlotFile(workingFileName)); // Put it on the stack if it starts with numericID
+                mPlotFiles.add(new PlotFile(workingFileName, file.length)); // Put it on the stack if it starts with numericID
             }
         }
     }

@@ -84,6 +84,15 @@ public class BurstUtil {
         }
     }
 
+    public static String getPathToSD() {
+        String mPath = "";
+        String[] mCards = getStorageDirectories();
+        if (mCards.length > 0) {
+            mPath = mCards[0];
+        }
+        return mPath;
+    }
+
     // ToDo: Testing 8-July on Hardware, return .51 <-- Is This correct for a simulated SD, thought it should be 2GB?
     // We are looking internal memory that is registering as External, need to fix this some how, we only want real SD cards
     // We Get these results with no card as well!!
