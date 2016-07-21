@@ -30,8 +30,16 @@ public class Plotter {
         Log.d(TAG, "Plotter Inited");
     }
 
+    public void reload() {
+        mPlotFiles.rescan();
+    }
+
     public int getPlotSize() {
         return mPlotFiles.size();
+    }
+
+    public void delete1GB() {
+        // ToDo: Write this code
     }
 
     public void plot1GB() {
@@ -39,7 +47,6 @@ public class Plotter {
         mNewPlot.setNumericID(mNumericID);
         mNewPlot.setStartNonce(mPlotFiles.size()*PlotFile.NonceToComplete);
         // Set a wait some how
-        callback.notice("SPINNER", "START");
         mNewPlot.plot();
         // This is now handled by the seperate thread
         //callback.notice("PLOTTER", "SUCCESS", "1GB PLOT CREATED");

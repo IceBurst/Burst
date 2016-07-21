@@ -1,12 +1,11 @@
 package burstcoin.com.burst.burstcoin.com.burst.plotting;
 
 import android.util.Log;
-
 import java.io.File;
 import java.util.ArrayList;
 
 /**
- * Created by tim on 7/19/2016.
+ * Created by IceBurst on 7/19/2016.
  */
 
 /*
@@ -16,9 +15,10 @@ import java.util.ArrayList;
 public class PlotFiles {
 
     private ArrayList<PlotFile> mPlotFiles;
-    //private ArrayList<String> mPlotFiles;
     private String mPath;
     private String mNumericID;
+
+    static String TAG = "PlotFiles";
 
     public PlotFiles(String path, String numericID) {
         mPath = path;
@@ -38,17 +38,13 @@ public class PlotFiles {
         getPlotFiles();
     }
 
-    /*
-    public PlotFile newPlot() {
-        // find where we need to start
-        long nextNonce = this.size() * 128; // ToDo: 128 is a place holder it should be 4096
-        PlotFile mNewPlot = new PlotFile();
-        mNewPlot.setNumericID(mNumericID);
-        mNewPlot.setStartNonce(nextNonce);
-        return mNewPlot;
-    }*/
+    public void rescan() {
+        getPlotFiles();
+    }
 
     private void getPlotFiles() {
+        mPlotFiles = null;
+        mPlotFiles = new ArrayList<PlotFile>();
         String workingFileName = "";
         Log.d("Files", "Path: " + mPath);
         File f = new File(mPath);
@@ -57,9 +53,10 @@ public class PlotFiles {
         for (int i=0; i < file.length; i++)
         {
             workingFileName = file[i].getName();
-            Log.d("Files", "FileName:" + workingFileName);
+            Log.d(TAG, "FileName:" + workingFileName);
             if(workingFileName.contains(mNumericID)) {
                 mPlotFiles.add(new PlotFile(workingFileName, file.length)); // Put it on the stack if it starts with numericID
+                Log.d(TAG,"Found Plot:" + workingFileName);
             }
         }
     }

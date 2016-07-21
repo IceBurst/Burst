@@ -13,7 +13,7 @@ import burstcoin.com.burst.BurstUtil;
  */
 public class PlotFile {
 
-    public static int NonceToComplete = 128;  // This will have to be 4096 in the end
+    public static int NonceToComplete = 64;  // This will have to be 4096 in the end
 
     private IntPlotStatus mCallback;
     private String mFileName;       // Complete File Name
@@ -51,7 +51,7 @@ public class PlotFile {
         Long mNonce = mStart;
         FileOutputStream out;
 
-        mCallback.notice("PLOTTING", "PERCENT", "0");
+        mCallback.notice("PLOTTING", "NONCE", "0");
         // Do the plot loop in here
         mFileName = mNumericID + '_' + Long.toString(mStart) + '_' + Long.toString(new Long(NonceToComplete)+mStart) + '_' + Long.toString(mStgr);
         String mPlotFile = BurstUtil.getPathToSD() + '/' + mFileName;
@@ -66,15 +66,25 @@ public class PlotFile {
         int staggeramt = 1; // Fix to get us through this with out changing code
         byte[] outputbuffer = new byte[(int) (staggeramt * SinglePlot.PLOT_SIZE)]; // <-- this is 1 nonce
         // java.lang.ArrayIndexOutOfBoundsException: src.length=262144 srcPos=262080 dst.length=262144 dstPos=262144 length=64
+        /* this crashes with the following data
+07-20 17:54:56.829 2856-2856/burstcoin.com.burst D/PlotFile: 0: This is iteration #:4095
+07-20 17:54:56.829 2856-2856/burstcoin.com.burst D/PlotFile: 1: plot.data.length is:262144
+07-20 17:54:56.829 2856-2856/burstcoin.com.burst D/PlotFile: 2: starting copy from 262080
+07-20 17:54:56.829 2856-2856/burstcoin.com.burst D/PlotFile: 3: outputbuffer has a size of: 262144
+07-20 17:54:56.829 2856-2856/burstcoin.com.burst D/PlotFile: 4: Starting to copy at 262144 of the output buffer we are starting at the last element of course this fails
+07-20 17:54:56.829 2856-2856/burstcoin.com.burst D/PlotFile: 5: Trying to Copy 64 bytes
+
+         */
 
         for (int mWorkingNonce = 0;mWorkingNonce < NonceToComplete ;mWorkingNonce++){   // This will need to be 4096
             // I get it they are biuding the buffer up to the stagger size before writing, this is more effecient but we dont care
 
             SinglePlot plot = new SinglePlot(address, mNonce);
-
+            Log.d(TAG, "Plotting Nonce #:" + mWorkingNonce + " of " + NonceToComplete);
             // Need to understand this a little better
-            for(int i = 0; i < SinglePlot.SCOOPS_PER_PLOT; i++) { // through 4096
-                // Lets Debug before we drop it on the ground
+            // why do we iterate through?  Why not just copy the whole block in?
+            /*
+            for(int i = 0; i < SinglePlot.SCOOPS_PER_PLOT; i++) { // through 4096 crashing on the last entry
                 Log.d (TAG,"0: This is iteration #:" + i);
                 Log.d (TAG,"1: plot.data.length is:" + plot.data.length);
                 Log.d (TAG,"2: starting copy from " + Long.toString(i * SinglePlot.SCOOP_SIZE) );
@@ -87,16 +97,22 @@ public class PlotFile {
                         (int) ((i * SinglePlot.SCOOP_SIZE * staggeramt) + (1 * SinglePlot.SCOOP_SIZE)), // Starting Position in the Destination Array
                         SinglePlot.SCOOP_SIZE);                     // length of bytes to copy
                 //java.lang.ArrayIndexOutOfBoundsException: src.length=262144 srcPos=262080 dst.length=262144 dstPos=262144 length=64
-            }
+            }*/
+
+            /* complete success
+            root@generic_x86_64:/storage/sdcard # ls -l
+                    -rwxrwx--- root     sdcard_r 33554432 2016-07-20 18:04 14041956000257417609_0_128_1
+            */
 
             try {
-                out.write(outputbuffer);
+                //out.write(outputbuffer);
+                out.write(plot.data);
                 out.flush();
             } catch (IOException ioex) {
                 Log.e(TAG,"IOException writing to"+mPlotFile);
                 return;
             }
-            mCallback.notice("PLOTTING", "PERCENT", Integer.toString(mWorkingNonce/NonceToComplete));
+            mCallback.notice("PLOTTING", "NONCE", Integer.toString(mWorkingNonce));
         }
 
         try{
@@ -104,7 +120,7 @@ public class PlotFile {
         }catch(
             IOException ioex){return;
         }
-        mCallback.notice("PLOTTING", "PERCENT", "100");
+        mCallback.notice("PLOTTING", "NONCE", Integer.toString(NonceToComplete));
     }
 
     public static long parseUnsignedLong(String s, int radix)
