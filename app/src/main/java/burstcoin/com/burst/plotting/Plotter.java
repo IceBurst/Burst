@@ -1,4 +1,4 @@
-package burstcoin.com.burst.burstcoin.com.burst.plotting;
+package burstcoin.com.burst.plotting;
 
 import android.util.Log;
 
@@ -39,7 +39,7 @@ public class Plotter {
     }
 
     public void delete1GB() {
-        // ToDo: Write this code
+        mPlotFiles.deletePlot();
     }
 
     public void plot1GB() {

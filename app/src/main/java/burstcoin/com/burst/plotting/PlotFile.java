@@ -1,4 +1,4 @@
-package burstcoin.com.burst.burstcoin.com.burst.plotting;
+package burstcoin.com.burst.plotting;
 
 import android.util.Log;
 
@@ -45,6 +45,9 @@ public class PlotFile {
 
     public void setNumericID(String numericID) { mNumericID = numericID; }
     public void setStartNonce(long start) {mStart = start;}
+    public String getFileName() {
+        return this.mFileName;
+    }
 
     public void plot() {
         // This needs to be Threaded out so we can cancel it....
@@ -122,7 +125,6 @@ public class PlotFile {
         }
         mCallback.notice("PLOTTING", "NONCE", Integer.toString(NonceToComplete));
     }
-
     public static long parseUnsignedLong(String s, int radix)
             throws NumberFormatException {
         BigInteger b= new BigInteger(s,radix);

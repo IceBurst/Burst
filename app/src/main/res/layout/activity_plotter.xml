@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="burstcoin.com.burst.PlotterActivity"
+    tools:context=".PlotterActivity"
     android:theme="@style/AppTheme.AppBarOverlay"
     android:background="@color/background_floating_material_dark">
 

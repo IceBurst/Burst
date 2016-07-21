@@ -33,9 +33,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Toast;
-import com.google.android.gms.appindexing.Action;
+
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 import java.util.ArrayList;
@@ -85,6 +84,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 this, mDrawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawer.setDrawerListener(toggle);
         toggle.syncState();
+
+        //Context.getApplicationInfo().sourceDir;
+
+        //Context.getPackageManager().getInstallerPackageName(packageName);
 
         mWebView = (WebView) findViewById(R.id.activity_main_webview);
 
@@ -439,6 +442,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     //@SuppressWarnings("StatementWithEmptyBody")
 
+    /*
     @Override
     public void onStart() {
         super.onStart();
@@ -478,7 +482,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         AppIndex.AppIndexApi.end(client, viewAction);
         client.disconnect();
     }
-
+*/
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -536,10 +540,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         else {        // ToDo: DOM Level 3 - MutationEvent (DOES NOT WORK YET)
             jsInjection =
                     "javascript:" +
-                            "Android.getBurstID('Hello');" +
+                            "Android.getBurstID('Hello');" +  // <-- This does not work
                     "try { " +
                       "var account = document.getElementById('account_id')[0];"+
-                            "Android.getBurstID('OldAssVersion');" +    // <-- This is not ffiring
+                            "Android.getBurstID('Pre 4.4');" +    // <-- This is not ffiring
                       "account.addEventListener('DOMCharacterDataModified', function(e) {" +  // DOMSubtreeModified or DOMAttrModified or DOMCharacterDataModified
                         "Android.getBurstID(document.getElementById('account_id).innerHTML);" +
                       "}, false);" +

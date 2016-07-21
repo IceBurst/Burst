@@ -1,4 +1,4 @@
-package burstcoin.com.burst.burstcoin.com.burst.plotting;
+package burstcoin.com.burst.plotting;
 
 import android.util.Log;
 import java.io.File;
@@ -33,15 +33,31 @@ public class PlotFiles {
     // Delete the last plot in the list
     public void deletePlot() {
         if (mPlotFiles.size() > 0) {
-            // delete it from disk
+            String mDeleteFile = "";
+            int mHighestNonce = 0;
+            for (PlotFile mPF : mPlotFiles) {
+                String mWorkingFile = mPF.getFileName();
+                String[] mParts = mWorkingFile.split("_");
+                int mCheckingNonce = Integer.parseInt(mParts[1]);
+                if (mCheckingNonce >= mHighestNonce) {
+                    mHighestNonce = mCheckingNonce;
+                    mDeleteFile = mWorkingFile;
+                    Log.d(TAG,"New Highest Found:" + mWorkingFile);
+                }
+            }
+            File file = new File(mPath+'/'+mDeleteFile);
+            Log.d(TAG, "We deleted:"+mPath+'/'+mDeleteFile);
+            file.delete();
         }
         getPlotFiles();
     }
 
+    // refresh the PlotFiles from external
     public void rescan() {
         getPlotFiles();
     }
 
+    // Internal refresh the PlotFiles worker
     private void getPlotFiles() {
         mPlotFiles = null;
         mPlotFiles = new ArrayList<PlotFile>();

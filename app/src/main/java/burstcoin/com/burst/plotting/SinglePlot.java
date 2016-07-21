@@ -1,4 +1,4 @@
-package burstcoin.com.burst.burstcoin.com.burst.plotting;
+package burstcoin.com.burst.plotting;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;

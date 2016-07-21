@@ -23,10 +23,10 @@ import burstcoin.com.burst.BurstUtil;
 import burstcoin.com.burst.IntProvider;
 import burstcoin.com.burst.MainActivity;
 import burstcoin.com.burst.PlotterActivity;
-import burstcoin.com.burst.burstcoin.com.burst.plotting.IntPlotStatus;
-import burstcoin.com.burst.burstcoin.com.burst.plotting.PlotFile;
-import burstcoin.com.burst.burstcoin.com.burst.plotting.PlotFiles;
-import burstcoin.com.burst.burstcoin.com.burst.plotting.Plotter;
+import burstcoin.com.burst.plotting.IntPlotStatus;
+import burstcoin.com.burst.plotting.PlotFile;
+import burstcoin.com.burst.plotting.PlotFiles;
+import burstcoin.com.burst.plotting.Plotter;
 
 public class PlotterActivity extends AppCompatActivity implements IntPlotStatus {
 
@@ -88,7 +88,7 @@ public class PlotterActivity extends AppCompatActivity implements IntPlotStatus 
         mConfirm.setNegativeButton("NO", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                // Do Nothing
+                // Do Nothing, just close down
             }
         });
 
@@ -250,11 +250,11 @@ public class PlotterActivity extends AppCompatActivity implements IntPlotStatus 
                             @Override
                             public void run() {
                                 mProgressDialog.dismiss();
+                                mProgressDialog.setProgress(0);
                                 mPlotter.reload();
                                 updateDriveInfo();
                             }
                         });
-                        // ToDo: This is not getting updated???
                     } else if (args[2].equals(Integer.toString(0))) {
                         runOnUiThread(new Runnable() {
                             @Override
