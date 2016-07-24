@@ -20,8 +20,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -69,7 +71,7 @@ public class BurstUtil {
             StatFs stat = new StatFs(mCards[0]);
             long bytesAvailable = stat.getAvailableBytes();
             long megsAvailable = bytesAvailable / 1048576;
-            DecimalFormat roundingFormat = new DecimalFormat("#.##");
+            DecimalFormat roundingFormat = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.US));
             roundingFormat.setRoundingMode(RoundingMode.DOWN);
             return Double.parseDouble(roundingFormat.format(((double)megsAvailable / (double)1024)));
         }
@@ -121,7 +123,7 @@ public class BurstUtil {
             StatFs stat = new StatFs(mCards[0]);
             // Result Sets : Emulator @ Home Nexus 5X w/ 8GB card returned /storage/sdcard which was correct
             long megsAvailable = stat.getTotalBytes() / 1048576;
-            DecimalFormat roundingFormat = new DecimalFormat("#.##");
+            DecimalFormat roundingFormat = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.US));
             roundingFormat.setRoundingMode(RoundingMode.DOWN);
             //  getExternalFilesDir(null)
             return Double.parseDouble(roundingFormat.format(((double)megsAvailable / (double)1024)));

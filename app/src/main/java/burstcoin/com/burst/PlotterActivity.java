@@ -174,9 +174,13 @@ public class PlotterActivity extends AppCompatActivity implements IntPlotStatus 
 
     // We should pass in the Text box to update
     private void updateDriveInfo() {
-        mTotalSpace = BurstUtil.getTotalSpaceInGB();
+        try {
+            mTotalSpace = BurstUtil.getTotalSpaceInGB();
+            mFreeSpace =  BurstUtil.getFreeSpaceInGB();
+        } catch (Exception e) {
+            Log.d(TAG, "Something went wrong trying to get Space");
+        }
         String mStringTotalSpace = Double.toString(mTotalSpace);
-        mFreeSpace =  BurstUtil.getFreeSpaceInGB();
         String mStringFreeSpace = Double.toString(mFreeSpace);
         mTxtDriveInfo.setText(mStringFreeSpace+"GB Free of "+ mStringTotalSpace+"GB Total");
         ProgressBar mProgressBar = (ProgressBar) findViewById(R.id.barDriveUseage);
