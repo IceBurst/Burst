@@ -137,7 +137,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Done"
-        android:id="@+id/btnDone"
+        android:id="@+id/btnMinerOp"
         android:layout_gravity="center_horizontal|bottom"
         android:layout_marginBottom="26dp"
         android:layout_alignParentBottom="true"

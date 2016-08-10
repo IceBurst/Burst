@@ -30,6 +30,13 @@ public class Plotter {
         Log.d(TAG, "Plotter Inited");
     }
 
+    public Plotter (String nID) {
+        this.mNumericID = nID;
+        mPath = BurstUtil.getPathToSD();
+        mPlotFiles = new PlotFiles(mPath, mNumericID);
+        Log.d(TAG, "Plotter Inited without Callback");
+    }
+
     public void reload() {
         mPlotFiles.rescan();
     }

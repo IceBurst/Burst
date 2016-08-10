@@ -4,8 +4,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,13 +17,8 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.TreeMap;
 
-import burstcoin.com.burst.BurstUtil;
-import burstcoin.com.burst.IntProvider;
-import burstcoin.com.burst.MainActivity;
-import burstcoin.com.burst.PlotterActivity;
 import burstcoin.com.burst.plotting.IntPlotStatus;
 import burstcoin.com.burst.plotting.PlotFile;
-import burstcoin.com.burst.plotting.PlotFiles;
 import burstcoin.com.burst.plotting.Plotter;
 
 public class PlotterActivity extends AppCompatActivity implements IntPlotStatus {
@@ -56,7 +49,7 @@ public class PlotterActivity extends AppCompatActivity implements IntPlotStatus 
         mPlotter = new Plotter((IntPlotStatus)this, numericID);
 
         // Enable the Done button
-        mBtnDone = (Button) findViewById(R.id.btnDone);
+        mBtnDone = (Button) findViewById(R.id.btnMinerOp);
         mBtnPlot = (Button) findViewById(R.id.btnPlot);
         mBtnDeletePlot = (Button) findViewById(R.id.btnDeletePlot);
         mSizeBar = (SeekBar) findViewById(R.id.setPlotSize);

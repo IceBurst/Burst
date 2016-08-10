@@ -1,12 +1,14 @@
 package burstcoin.com.burst.mining;
 
 import android.util.Log;
+import android.widget.Button;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import burstcoin.com.burst.GetAsync;
 import burstcoin.com.burst.JSONCaller;
+import burstcoin.com.burst.R;
 import fr.cryptohash.Shabal256;
 import nxt.crypto.Crypto;
 import nxt.util.Convert;
@@ -27,44 +29,18 @@ import java.util.*;
 
 public class MiningService {
 
-    /*  This is the request to the Server for current block information
-    GET /burst?requestType=getMiningInfo HTTP/1.1
-    Accept-Encoding: gzip
-    User-Agent: Jetty/9.3.8.RC0
-    Host: pool.burst-team.us
-
-    // This is the response from the server about the current block, looks like POST back data
-    HTTP/1.1 200 OK
-    Connection: Keep-Alive
-    Content-Length: 181
-    Content-Type: text/html; charset=UTF-8
-    Date: Thu, 21 Jul 2016 19:48:03 GMT
-
-    {
-    "generationSignature":"7dc92a727aaa098113668f023f33fb1f040632884671ea69bc61004707e1f2e1",
-       // My notes:        1234567890123456789012345678901234567890123456789012345678901234
-                           0        10        20        30        40        50        60
-       // GenSig is a 64 byte key
-    "baseTarget":"2070337",
-    "requestProcessingTime":0,
-    "height":"253939",
-    "targetDeadline":172800
-    }
-    */
-
     // Live BlockData
-    Block mActiveBlock = new Block();
-
+    public Block mActiveBlock = new Block();
     static String TAG = "MiningService";
 
     // Only Supporting official on initial release
     public static String POOL_TYPE_URAY="uray";
     public static String POOL_TYPE_OFFICAL="offical";
+    public boolean running = false;
 
     // Used for the GetBlockInfo
     Timer mPoller;
-    static int POLL_SECONDS = 2;
-
+    static int POLL_SECONDS = 3;
     String poolType;
 
     String poolUrl = "http://pool.burst-team.us";
@@ -78,16 +54,20 @@ public class MiningService {
     BigInteger deadline = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
     Random rand;
     boolean startedCPUMining = false;
+    private IntMiningStatus mCallback;
+
 
     // Constructor for the Mining Service
-    public MiningService () {
-        start();
+    public MiningService (IntMiningStatus cb) {
+        mCallback = cb;
+        // Do some checks, if everything is good start auto-mining
+        //start();
     }
-
 
 
     public void start() {
         Log.d(TAG, "starting");
+        running = true;
         mPoller = new Timer();
         mPoller.schedule( new TimerTask() {
             public void run() {
@@ -104,19 +84,25 @@ public class MiningService {
                         mActiveBlock.genSig = mJSONBlockData.getString("generationSignature");
                         mActiveBlock.baseTarget = Long.parseLong(mJSONBlockData.getString("baseTarget"));
                         mActiveBlock.targetDeadline = mJSONBlockData.getLong("targetDeadline");
-                        mActiveBlock.reqProcessingTime = mJSONBlockData.getBoolean("requestProcessingTime");
-                        Log.d(TAG,"We just got our next block");
+                        //mActiveBlock.reqProcessingTime = mJSONBlockData.getBoolean("requestProcessingTime"); <-- This was throwing org.json.JSONException: Value 0 at requestProcessingTime of type java.lang.Integer cannot be converted to boolean
+                        mActiveBlock.reqProcessingTime = mJSONBlockData.getInt("requestProcessingTime");
+                        mCallback.notice("BLOCK","HEIGHT",Long.toString(mActiveBlock.height));
+                        // Holy crap we got a new block lets mine this puppy if we can.....
                     }
                     // Else it's a repeat block dont do anything.
                 } catch (org.json.JSONException e) {
                     Log.d(TAG,"JSON Object Exploded on GetBlockData");  // Just try again in another 2 seconds
+                    Log.e(TAG, "exception", e);
                 }
             }
         }, 0, 1000*POLL_SECONDS);
+        mCallback.notice("MINING","STARTED");
     }
 
     public void stop() {
         mPoller.cancel();
+        running = false;
+        mCallback.notice("MINING","STOPPED");
     }
 
     /*

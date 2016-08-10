@@ -171,8 +171,6 @@ public class BurstUtil {
     public void getNumericIDFromBurstID(final String burstID, final Context context) {
 
         String URL = "https://wallet.burst-team.us:8125/burst?requestType=rsConvert&account=" + burstID;
-        // ToDo: Have someone look at why SSL is failing starting in 12-July
-        //String URL = "http://util.burst-team.us:8080/burst?requestType=rsConvert&account=" + burstID;
 
         GetAsync jsonCall = new GetAsync(URL) {
             @Override
@@ -191,6 +189,53 @@ public class BurstUtil {
             }
         };
         jsonCall.execute(burstID);
+    }
+
+    public void getRewardIDFromNumericID(final String burstID, final Context context) {
+
+        String URL = "https://mobile.burst-team.us:8125/burst?requestType=getRewardRecipient&account=" + burstID;
+
+        GetAsync jsonCall = new GetAsync(URL) {
+            @Override
+            protected void onPostExecute (JSONObject json) {
+                if (json != null) {
+                    try {
+                        String rewardID = json.getString("rewardRecipient");
+                        provider.notice("GOTREWARDID", "SUCCESS", rewardID);
+                    } catch (JSONException e) {
+                        provider.notice("GOTREWARDID", "JSON EXCEPTION");
+                    }
+                } else {
+                    provider.notice("GOTREWARDID", "JSON NULL");
+                }
+            }
+        };
+        jsonCall.execute(burstID);
+    }
+
+    public static void setRewardAssignment(final String mNumericID, final String mPassPhrase) {
+
+        String URL = "https://mwallet.burst-team.us:8125/burst?requestType=setRewardRecipient&account=" + mNumericID + "&secretPhrase=" + mPassPhrase;
+        // Fails: Reponse, only accepted with a POST
+        Log.d(TAG,"setRewardAssignment: " + URL);
+        PostAsync
+        //GetAsync jsonCall = new GetAsync(URL);
+        /*{
+            @Override
+            protected void onPostExecute (JSONObject json) {
+                if (json != null) {
+                    try {
+                        String rewardID = json.getString("rewardRecipient");
+                        provider.notice("GOTREWARDID", "SUCCESS", rewardID);
+                    } catch (JSONException e) {
+                        provider.notice("GOTREWARDID", "JSON EXCEPTION");
+                    }
+                } else {
+                    provider.notice("GOTREWARDID", "JSON NULL");
+                }
+            }
+        };*/
+        //jsonCall.execute();
     }
 
     // Get the Free Memory on the device

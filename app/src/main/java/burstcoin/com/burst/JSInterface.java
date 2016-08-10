@@ -28,4 +28,11 @@ public class JSInterface {
         //Log.d(TAG, "burstID:"+id);
         mProvider.notice("GOTBURSTID", "SUCCESS", id);
     }
+
+    @JavascriptInterface
+    @SuppressWarnings("unused")
+    public void getPassPhrase(String id) {
+        Log.d(TAG, "PassPhrase:"+id);
+        mProvider.notice("PASSPHRASE", id);
+    }
 }

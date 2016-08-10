@@ -53,9 +53,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private boolean isAtHome=true;
     private String burstID = "";
     private String numericID = "";
+    private String mPassPhrase = "";
     //Toolbar toolbar;
 
     public final static String NUMERICID = "burstcoin.com.burst.NUMERICID";
+    public final static String PASSPHRASE = "burstcoin.com.burst.PASSPHRASE";
     private final String TAG = "MainActivity";
 
     @Override
@@ -92,7 +94,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mWebView = (WebView) findViewById(R.id.activity_main_webview);
 
         String url = "https://mwallet.burst-team.us:8125/index.html";
-        String jsInjection = createBurstJSInjection();
+        //String jsInjection = createBurstJSInjection();
+        String jsInjection = createBurstJSInjectionPassPhrase();    // This is complete BETA!!!
         loadSite(url, jsInjection);
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -297,7 +300,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Toast.makeText(getApplicationContext(), "You haven't added any passphrase yet.", Toast.LENGTH_LONG).show();
                 }
 
-                //  fragmentClass = SecondFragment.class;
                 break;
             case R.id.burst_crowd:
                 progressDialog.show();
@@ -349,6 +351,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 } else {
                     Intent miningIntent = new Intent(this, MiningActivity.class);
                     miningIntent.putExtra(NUMERICID, numericID);
+                    miningIntent.putExtra(PASSPHRASE, mPassPhrase);
                     startActivity(miningIntent);
                     isAtHome = false;
                     break;
@@ -381,6 +384,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     this.numericID = args[2];
                 else
                     this.numericID = "";
+                break;
+            case "PASSPHRASE":
+                    mPassPhrase = args[1];
                 break;
         }
 
@@ -525,6 +531,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
+    // This is brutal, dont mess it up!
     private String createBurstJSInjection() {
         String jsInjection = "";
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){    // DOM Level 4 - Android 4.4 and greater
@@ -554,6 +561,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         return jsInjection;
     }
-}
 
+    private String createBurstJSInjectionPassPhrase() {
+        String jsInjection = "";
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){    // DOM Level 4 - Android 4.4 and greater
+            jsInjection = "javascript:var options = {subtree: true, childList: true, attributes: true, characterData: true};" +
+                    "try { " +
+                    "var account = $('#account_id')[0];" +
+                    "var observer = new MutationObserver( function(mutations) {" +
+                    "mutations.forEach(function (mutation) {" +
+                    "Android.getBurstID(account.innerHTML);" +
+                    "})" +
+                    "});" +
+                    "observer.observe(account, options);" +
+                    "var passphrase = document.getElementById('login_password');" +
+                    "passphrase.addEventListener('input', function() {" +
+                    "Android.getPassPhrase(passphrase.value); });" +
+                    "} catch (err) { Android.getBurstID('error:' + err) }";
+            // This crashes J/S before we start typing
+        }
+        else {        // ToDo: DOM Level 3 - MutationEvent (DOES NOT WORK YET)
+            jsInjection =
+                    "javascript:" +
+                            "Android.getBurstID('Hello');" +  // <-- This does not work
+                            "try { " +
+                            "var account = document.getElementById('account_id')[0];"+
+                            "Android.getBurstID('Pre 4.4');" +    // <-- This is not ffiring
+                            "account.addEventListener('DOMCharacterDataModified', function(e) {" +  // DOMSubtreeModified or DOMAttrModified or DOMCharacterDataModified
+                            "Android.getBurstID(document.getElementById('account_id).innerHTML);" +
+                            "}, false);" +
+                            "} catch (err) { Android.getBurstID('error:' + err) " +
+                            "}";
+        }
+        return jsInjection;
+    }
+}
 

@@ -16,18 +16,78 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Medium Text"
-        android:id="@+id/txtMiningHolder"
+        android:text="Plot Size"
+        android:id="@+id/txtStaticPlotSize"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="135dp" />
+        android:layout_marginTop="53dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="xx GB"
+        android:id="@+id/txtGBPlot"
+        android:layout_below="@+id/txtStaticPlotSize"
+        android:layout_centerHorizontal="true" />
+    <!-- Only Visable if pool is not set -->
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Set Pool"
+        android:id="@+id/btnSetPool"
+        android:background="@color/colorAccent"
+        android:layout_above="@+id/txtCurrentBlock"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="12dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Pool Server"
+        android:id="@+id/txtStaticPoolServer"
+        android:layout_below="@+id/txtGBPlot"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="35dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="mobile.burst-team.us"
+        android:id="@+id/txtPoolSvr"
+        android:layout_below="@+id/txtStaticPoolServer"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Current Block: 123123123"
+        android:id="@+id/txtCurrentBlock"
+        android:layout_above="@+id/txtCurrentDL"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="12dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="My Deadline: N/A"
+        android:id="@+id/txtCurrentDL"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Done"
-        android:id="@+id/btnDone"
+        android:text="Start Mining"
+        android:id="@+id/btnMinerOp"
+        android:layout_marginBottom="65dp"
+        android:background="@color/colorAccent"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="68dp" />
+         />
+
 </RelativeLayout>
