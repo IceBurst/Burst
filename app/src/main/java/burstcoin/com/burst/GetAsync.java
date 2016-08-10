@@ -9,7 +9,7 @@ import java.util.HashMap;
  * Created by IceBurst on 7/7/2016.
  */
 
-class GetAsync extends AsyncTask<String, String, JSONObject> {
+public class GetAsync extends AsyncTask<String, String, JSONObject> {
 
     JSONParser jsonParser = new JSONParser();
 

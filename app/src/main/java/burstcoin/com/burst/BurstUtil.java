@@ -170,9 +170,9 @@ public class BurstUtil {
     // Get Burst NumericID from Online API
     public void getNumericIDFromBurstID(final String burstID, final Context context) {
 
-        //String URL = "https://wallet.burst-team.us:8125/burst?requestType=rsConvert&account=" + burstID;
+        String URL = "https://wallet.burst-team.us:8125/burst?requestType=rsConvert&account=" + burstID;
         // ToDo: Have someone look at why SSL is failing starting in 12-July
-        String URL = "http://util.burst-team.us:8080/burst?requestType=rsConvert&account=" + burstID;
+        //String URL = "http://util.burst-team.us:8080/burst?requestType=rsConvert&account=" + burstID;
 
         GetAsync jsonCall = new GetAsync(URL) {
             @Override

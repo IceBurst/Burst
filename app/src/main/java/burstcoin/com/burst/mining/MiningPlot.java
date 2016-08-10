@@ -1,7 +1,6 @@
-package ish.burst.ms.objects;
+package burstcoin.com.burst.mining;
 
 import fr.cryptohash.Shabal256;
-
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 

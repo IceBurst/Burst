@@ -2,10 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="burstcoin.com.burst">
 
+    <uses-sdk
+        android:minSdkVersion="14"
+        android:targetSdkVersion="22" />
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-    <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="22"/>
+    <android:uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <android:uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -19,6 +25,7 @@
             android:theme="@style/AppTheme.ActionBar.Transparent">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -38,8 +45,17 @@
         <activity
             android:name=".SomeActivity"
             android:label="@string/app_name" />
-            -->
-        <activity android:name=".PlotterActivity"></activity>
+        -->
+        <activity android:name=".PlotterActivity" />
+        <activity
+            android:name=".MiningActivity"
+            android:label="@string/title_activity_mining"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="burstcoin.com.burst.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

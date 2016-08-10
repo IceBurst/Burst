@@ -342,15 +342,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
 
             case R.id.nav_mining:
-                    // ToDo: Using this as a Cheap test button while we Design out the Mining Phase
-                    BurstUtil x = new BurstUtil(this);
-                    if (!burstID.isEmpty())
-                        x.getNumericIDFromBurstID(burstID, this);
-
-                    //    Toast.makeText(getApplicationContext(),"Not implemented yet. Under development",Toast.LENGTH_LONG).show();
-                    isAtHome=false;
-                break;
-
+                if (burstID.isEmpty())
+                    Toast.makeText(getApplicationContext(),"Please login so we can obtain your Burst ID",Toast.LENGTH_LONG).show();
+                else if (numericID.isEmpty()){
+                    Toast.makeText(getApplicationContext(),"Please login so we can obtain your numeric ID for plotting",Toast.LENGTH_LONG).show();
+                } else {
+                    Intent miningIntent = new Intent(this, MiningActivity.class);
+                    miningIntent.putExtra(NUMERICID, numericID);
+                    startActivity(miningIntent);
+                    isAtHome = false;
+                    break;
+                }
             default:
 
         }

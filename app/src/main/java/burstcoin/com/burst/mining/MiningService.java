@@ -2,38 +2,22 @@ package burstcoin.com.burst.mining;
 
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import burstcoin.com.burst.GetAsync;
+import burstcoin.com.burst.JSONCaller;
 import fr.cryptohash.Shabal256;
 import nxt.crypto.Crypto;
 import nxt.util.Convert;
-/*
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.SpringApplication;
-import org.springframework.context.annotation.Scope;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import javax.annotation.PostConstruct;
-*/
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.BufferedInputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-/*
-import java.nio.file.Files;
-import java.nio.file.Paths;
-*/
 import java.util.*;
 
 /**
@@ -68,72 +52,90 @@ public class MiningService {
     }
     */
 
-    final String TAG = "MiningService";
+    // Live BlockData
+    Block mActiveBlock = new Block();
+
+    static String TAG = "MiningService";
 
     // Only Supporting official on initial release
     public static String POOL_TYPE_URAY="uray";
     public static String POOL_TYPE_OFFICAL="offical";
 
-    // Need something to perform REST commands with
-    //RestTemplate restTemplate = new RestTemplate();
+    // Used for the GetBlockInfo
+    Timer mPoller;
+    static int POLL_SECONDS = 2;
 
-
-    //@Value("${pool.type}")
     String poolType;
 
-    //@Value("${pool.url}")
-    String poolUrl = "pool.burst-team.us";
+    String poolUrl = "http://pool.burst-team.us";
     String poolGetBlockInfo = "/burst?requestType=getMiningInfo";
 
-    TaskExecutor executor;
-
-    //@Qualifier(value = "cpuMiningPool")
-    TaskExecutor cpuMiningPool;
-
-    //@Qualifier(value = "shareSubmitPool")
-    TaskExecutor shareExecutor;
-
-    //@Value("${miner.cpu.address}")
-    String minerCpuAddress;
-
-    //@Value("${miner.cpu.threads}")
     int minerCpuThreads = 1;
-
-    //@Value("${miner.cpu.enabled}")
     boolean minerCpuEnabled;
-
-    NetState processing;
-    NetState current;
-
-    ArrayList<PlotFileMiner> minerThreads = new ArrayList<PlotFileMiner>();
-
-    Map<Long, String> loadedPassPhrases = new HashMap<Long, String>();
-
+    // This class is commented out
+    //ArrayList<PlotFileMiner> minerThreads = new ArrayList<PlotFileMiner>();
     long lastShareSubmitTime;
-
     BigInteger deadline = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
-
     Random rand;
-
     boolean startedCPUMining = false;
 
+    // Constructor for the Mining Service
+    public MiningService () {
+        start();
+    }
+
+
+
+    public void start() {
+        Log.d(TAG, "starting");
+        mPoller = new Timer();
+        mPoller.schedule( new TimerTask() {
+            public void run() {
+                // This is where we poll the webserver for block data
+                Log.d(TAG, "Trying:"+poolUrl+poolGetBlockInfo);
+                String mBlockData = GET(poolUrl+poolGetBlockInfo);
+                Log.d(TAG, mBlockData);  // Looks like JSON as we expected
+                try {
+                    JSONObject mJSONBlockData = new JSONObject(mBlockData);
+                    // We are exploding instead off going into our if, I dont understand why
+                    if (mActiveBlock.height != mJSONBlockData.getLong("height")) {
+                        // We are on a new block, lets work hard!
+                        mActiveBlock.height = Long.parseLong(mJSONBlockData.getString("height"));
+                        mActiveBlock.genSig = mJSONBlockData.getString("generationSignature");
+                        mActiveBlock.baseTarget = Long.parseLong(mJSONBlockData.getString("baseTarget"));
+                        mActiveBlock.targetDeadline = mJSONBlockData.getLong("targetDeadline");
+                        mActiveBlock.reqProcessingTime = mJSONBlockData.getBoolean("requestProcessingTime");
+                        Log.d(TAG,"We just got our next block");
+                    }
+                    // Else it's a repeat block dont do anything.
+                } catch (org.json.JSONException e) {
+                    Log.d(TAG,"JSON Object Exploded on GetBlockData");  // Just try again in another 2 seconds
+                }
+            }
+        }, 0, 1000*POLL_SECONDS);
+    }
+
+    public void stop() {
+        mPoller.cancel();
+    }
+
+    /*
     public synchronized void registerBestShareForChunk(BigInteger lowestInChunk,long nonce,PlotFile plotFile){
            if(lowestInChunk.compareTo(deadline) < 0) {
                deadline = lowestInChunk;
-               shareExecutor.execute(new SubmitShare(nonce,plotFile,deadline));
+               //shareExecutor.execute(new SubmitShare(nonce,plotFile,deadline));
            }
        }
+    */
 
-
-
-    //@PostConstruct
     public void init(){
         rand = new Random();
-        List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
-        converters.add(new StringHttpMessageConverter());
-        restTemplate.setMessageConverters(converters);
+        //List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+        //converters.add(new StringHttpMessageConverter());
+        //restTemplate.setMessageConverters(converters);
         //loadPassPhrases();
     }
+
 
     public long getLastShareSubmitTime(){
         return lastShareSubmitTime;
@@ -163,19 +165,20 @@ public class MiningService {
     }
     */
 
+    /*
     public void stopAndRestartMining(){
         if(minerCpuEnabled){
             if(!startedCPUMining){
-                LOGGER.info("Starting CPU Mining with {"+minerCpuThreads+"} threads");
+                //LOGGER.info("Starting CPU Mining with {"+minerCpuThreads+"} threads");
                 for(int i=0;i<minerCpuThreads;i++){
-                    cpuMiningPool.execute(new CPUMiner());
+                    //cpuMiningPool.execute(new CPUMiner());
                 }
             }
         }
 
         for(PlotFileMiner miner : minerThreads){
             miner.stop();
-            miner.plotFile.addIncomplete();
+            //miner.plotFile.addIncomplete();
             //LOGGER.info("Stopped mining {"+miner.plotFile.getUUID()+"} due to block change");
         }
         minerThreads.clear();
@@ -192,8 +195,33 @@ public class MiningService {
             executor.execute(miner);
         }
     }
+*/
+    public static String GET(String url){
+        InputStream inputStream = null;
+        String result = "";
+        try {
+            // create HttpClient
+            URL uri = new URL(url);
+            HttpURLConnection urlConnection = (HttpURLConnection) uri.openConnection();
+            try {
+                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                result = convertStreamToString(in);  // This returns the object name @ reference
+                // This result is a JSON that we can use our module on
+            } finally {
+                urlConnection.disconnect();
+            }
+        } catch (Exception e) {
+            Log.d(TAG, e.getLocalizedMessage());
+        }
+        return result;
+    }
 
+    static String convertStreamToString(java.io.InputStream is) {
+        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
+    }
 
+    /*
     class CPUMiner implements Runnable{
         long address = 0;
 
@@ -253,9 +281,9 @@ public class MiningService {
 
         }
     }
+*/
 
-
-
+/*
     class PlotFileMiner implements Runnable{
 
         private PlotFile plotFile;
@@ -349,8 +377,9 @@ public class MiningService {
         }
 
     }
+*/
 
-
+    /*
     private class SubmitShare implements  Runnable{
 
         long nonce;
@@ -401,4 +430,5 @@ public class MiningService {
             }
         }
     }
+    */
 }
