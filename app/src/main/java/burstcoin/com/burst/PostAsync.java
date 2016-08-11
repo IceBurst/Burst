@@ -1,31 +1,23 @@
 package burstcoin.com.burst;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.HashMap;
 
 class PostAsync extends AsyncTask<String, String, JSONObject> {
     JSONParser jsonParser = new JSONParser();
 
-    //private ProgressDialog pDialog;
-
-    //private static final String LOGIN_URL = "http://www.example.com/testPost.php";
+    final static String TAG = "PostAsync";
     private String URL;
     private static final String TAG_SUCCESS = "success";
     private static final String TAG_MESSAGE = "message";
 
     @Override
     protected void onPreExecute() {
-        /*
-        pDialog = new ProgressDialog(MainActivity.this);
-        pDialog.setMessage("Attempting login...");
-        pDialog.setIndeterminate(false);
-        pDialog.setCancelable(true);
-        pDialog.show();
-        */
+
     }
 
     @Override
@@ -33,10 +25,12 @@ class PostAsync extends AsyncTask<String, String, JSONObject> {
         try {
             HashMap<String, String> params = new HashMap<>();
             URL = args[0];
-            //params.put("name", args[0]);
-            //params.put("password", args[1]);
+            int mParmCt = args.length;
+            for (int i = 1; i < mParmCt; i=i+2) {
+                params.put(args[i], args[i+1]);
+            }
 
-            //Log.d("request", "starting");
+            Log.d(TAG, "POST:" + URL);
 
             JSONObject json = jsonParser.makeHttpRequest(
                     URL, "POST", params);
@@ -57,12 +51,6 @@ class PostAsync extends AsyncTask<String, String, JSONObject> {
 
         int success = 0;
         String message = "";
-
-        /*
-        if (pDialog != null && pDialog.isShowing()) {
-            pDialog.dismiss();
-        }
-        */
 
         if (json != null) {
             //Toast.makeText(MainActivity.this, json.toString(),         Toast.LENGTH_LONG).show();

@@ -215,10 +215,12 @@ public class BurstUtil {
 
     public static void setRewardAssignment(final String mNumericID, final String mPassPhrase) {
 
-        String URL = "https://mwallet.burst-team.us:8125/burst?requestType=setRewardRecipient&account=" + mNumericID + "&secretPhrase=" + mPassPhrase;
-        // Fails: Reponse, only accepted with a POST
-        Log.d(TAG,"setRewardAssignment: " + URL);
-        PostAsync
+        String URL = "https://mwallet.burst-team.us:8125";
+        ///burst?requestType=setRewardRecipient&account=" + mNumericID + "&secretPhrase=" + mPassPhrase
+
+        PostAsync jsonCall = new PostAsync();
+        jsonCall.doInBackground(URL, "requestType", "setRewardRecipient","account",mNumericID,"secretPhrase",mPassPhrase);;
+
         //GetAsync jsonCall = new GetAsync(URL);
         /*{
             @Override
@@ -235,7 +237,7 @@ public class BurstUtil {
                 }
             }
         };*/
-        //jsonCall.execute();
+        jsonCall.execute();
     }
 
     // Get the Free Memory on the device

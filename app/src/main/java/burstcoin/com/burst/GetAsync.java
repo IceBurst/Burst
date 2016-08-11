@@ -21,7 +21,8 @@ public class GetAsync extends AsyncTask<String, String, JSONObject> {
     public GetAsync(String u) {
         this.URL = u;
     }
-        @Override
+
+    @Override
     protected void onPreExecute() {
     }
 
