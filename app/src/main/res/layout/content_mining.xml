@@ -64,7 +64,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Current Block: 123123123"
+        android:text="Current Block: Unknown"
         android:id="@+id/txtCurrentBlock"
         android:layout_above="@+id/txtCurrentDL"
         android:layout_centerHorizontal="true"

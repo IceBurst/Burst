@@ -100,12 +100,12 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                 mMiningService.start();
                 try {
                     Thread.sleep(2000);  // this is very hacky!  But we need to make sure we get the current block
-                    mFinalConfirm = mMiningService.mActiveBlock.height + 1;     // ToDo: This should be 4, set to 1 for testing
+                    mFinalConfirm = mMiningService.mActiveBlock.height + 4;
                 } catch (Exception e) {
 
                 }
                 // Send the Request
-                BurstUtil.setRewardAssignment("R4QA-8GHZ-DSUZ-GRC4G", mPassPhrase); // <-- Tie our passphrase to the Mining pool payout
+                BurstUtil.setRewardAssignment("16647933376790760136", mPassPhrase); // <-- Tie our passphrase to the Mining pool payout
             }
         });
         // ToDo: Make this better in the future, this is hacky and only allows a single pool service

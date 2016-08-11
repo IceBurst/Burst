@@ -19,6 +19,7 @@ public class GetAsync extends AsyncTask<String, String, JSONObject> {
     public static final String TAG_MESSAGE = "message";
 
     public GetAsync(String u) {
+        super();
         this.URL = u;
     }
 

@@ -11,7 +11,7 @@ class PostAsync extends AsyncTask<String, String, JSONObject> {
     JSONParser jsonParser = new JSONParser();
 
     final static String TAG = "PostAsync";
-    private String URL;
+    private String URL = "";
     private static final String TAG_SUCCESS = "success";
     private static final String TAG_MESSAGE = "message";
 

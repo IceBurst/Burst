@@ -22,8 +22,10 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -191,10 +193,10 @@ public class BurstUtil {
         jsonCall.execute(burstID);
     }
 
-    public void getRewardIDFromNumericID(final String burstID, final Context context) {
+    public void getRewardIDFromNumericID(final String numericID, final Context context) {
 
-        String URL = "https://mobile.burst-team.us:8125/burst?requestType=getRewardRecipient&account=" + burstID;
-
+        String URL = "http://mobile.burst-team.us:8125/burst?requestType=getRewardRecipient&account=" + numericID;
+        Log.d(TAG, "GetRewardID:"+URL);
         GetAsync jsonCall = new GetAsync(URL) {
             @Override
             protected void onPostExecute (JSONObject json) {
@@ -210,19 +212,45 @@ public class BurstUtil {
                 }
             }
         };
-        jsonCall.execute(burstID);
+        jsonCall.execute();
     }
 
     public static void setRewardAssignment(final String mNumericID, final String mPassPhrase) {
 
-        String URL = "https://mwallet.burst-team.us:8125";
+        final String url = "https://wallet.burst-team.us:8125/burst";
         ///burst?requestType=setRewardRecipient&account=" + mNumericID + "&secretPhrase=" + mPassPhrase
 
-        PostAsync jsonCall = new PostAsync();
-        jsonCall.doInBackground(URL, "requestType", "setRewardRecipient","account",mNumericID,"secretPhrase",mPassPhrase);;
+        PostAsync jsonCall = new PostAsync() {
+            @Override
+            protected JSONObject doInBackground(String... args) {
+                try {
+                    String URL = args[0];
+                    HashMap<String, String> params = new HashMap<>();
+                    int mParmCt = args.length;
+                    for (int i = 1; i < mParmCt; i=i+2) {
+                        params.put(args[i], args[i+1]);
+                    }
 
-        //GetAsync jsonCall = new GetAsync(URL);
-        /*{
+                    Log.d(TAG, "POST:" + URL);
+                    for (Map.Entry<String, String> p : params.entrySet()) {
+                        Log.d(TAG,"POST K->V:" +p.getKey() + "->" + p.getValue());
+                    }
+
+                    JSONObject json = jsonParser.makeHttpRequest(
+                            URL, "POST", params);
+
+                    if (json != null) {
+                        Log.d(TAG, "PostAsync result"+ json.toString());
+                        return json;
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            /*
             @Override
             protected void onPostExecute (JSONObject json) {
                 if (json != null) {
@@ -235,9 +263,10 @@ public class BurstUtil {
                 } else {
                     provider.notice("GOTREWARDID", "JSON NULL");
                 }
-            }
-        };*/
-        jsonCall.execute();
+            }*/
+        };
+        jsonCall.execute(url, "requestType","setRewardRecipient","recipient",mNumericID, "secretPhrase", mPassPhrase, "deadline","1440","feeNQT","100000000");
+        //jsonCall.execute(url, "requestType","setRewardRecipient","recipient",mNumericID, "secretPhrase", mPassPhrase );
     }
 
     // Get the Free Memory on the device
