@@ -49,16 +49,19 @@ public class PlotFiles {
             Log.d(TAG, "We deleted:"+mPath+'/'+mDeleteFile);
             file.delete();
         }
-        getPlotFiles();
+        refreshPlotFiles();
     }
 
     // refresh the PlotFiles from external
     public void rescan() {
-        getPlotFiles();
+        refreshPlotFiles();
     }
 
+    public ArrayList<PlotFile> getPlotFiles() {
+        return mPlotFiles;
+    }
     // Internal refresh the PlotFiles worker
-    private void getPlotFiles() {
+    private void refreshPlotFiles() {
         mPlotFiles = null;
         mPlotFiles = new ArrayList<PlotFile>();
         String workingFileName = "";

@@ -15,6 +15,7 @@ import android.widget.TextView;
 import burstcoin.com.burst.mining.IntMiningStatus;
 import burstcoin.com.burst.mining.MiningService;
 import burstcoin.com.burst.plotting.IntPlotStatus;
+import burstcoin.com.burst.plotting.PlotFiles;
 import burstcoin.com.burst.plotting.Plotter;
 
 public class MiningActivity extends AppCompatActivity implements IntMiningStatus, IntProvider{
@@ -24,6 +25,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
 
     private MiningService mMiningService;
     private Plotter mPlotter;
+    private PlotFiles mPlotFiles;
     private String mNumericID;
 
     private Button mBtnMiningAction;
@@ -52,8 +54,9 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
         mBtnMiningAction = (Button) findViewById(R.id.btnMinerOp);
         mBtnSetPool = (Button) findViewById(R.id.btnSetPool);
 
-        mMiningService = new MiningService(this);
+        mMiningService = new MiningService(this, mPlotFiles);
         mPlotter = new Plotter(mNumericID);
+        mPlotFiles = new PlotFiles(BurstUtil.getPathToSD(), mNumericID);
 
         int mPlotCt = mPlotter.getPlotSize();
         if (mPlotCt > 0) {

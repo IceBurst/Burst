@@ -9,6 +9,8 @@ import org.json.JSONObject;
 import burstcoin.com.burst.GetAsync;
 import burstcoin.com.burst.JSONCaller;
 import burstcoin.com.burst.R;
+import burstcoin.com.burst.plotting.PlotFile;
+import burstcoin.com.burst.plotting.PlotFiles;
 import fr.cryptohash.Shabal256;
 import nxt.crypto.Crypto;
 import nxt.util.Convert;
@@ -50,6 +52,7 @@ public class MiningService {
     boolean minerCpuEnabled;
     // This class is commented out
     //ArrayList<PlotFileMiner> minerThreads = new ArrayList<PlotFileMiner>();
+    private PlotFiles mPlotFiles;
     long lastShareSubmitTime;
     BigInteger deadline = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
     Random rand;
@@ -66,7 +69,7 @@ public class MiningService {
 
 
     public void start() {
-        Log.d(TAG, "starting");
+        Log.d(TAG, "Starting");
         running = true;
         mPoller = new Timer();
         mPoller.schedule( new TimerTask() {
@@ -88,6 +91,8 @@ public class MiningService {
                         mActiveBlock.reqProcessingTime = mJSONBlockData.getInt("requestProcessingTime");
                         mCallback.notice("BLOCK","HEIGHT",Long.toString(mActiveBlock.height));
                         // Holy crap we got a new block lets mine this puppy if we can.....
+                        stopAndRestartMining();
+
                     }
                     // Else it's a repeat block dont do anything.
                 } catch (org.json.JSONException e) {
@@ -151,37 +156,44 @@ public class MiningService {
     }
     */
 
-    /*
     public void stopAndRestartMining(){
+        /* Address this later, worry about breaking cycles
         if(minerCpuEnabled){
             if(!startedCPUMining){
                 //LOGGER.info("Starting CPU Mining with {"+minerCpuThreads+"} threads");
                 for(int i=0;i<minerCpuThreads;i++){
-                    //cpuMiningPool.execute(new CPUMiner());
+                    cpuMiningPool.execute(new CPUMiner());
                 }
             }
         }
-
+        */
+        /* This is to stop existing miners
         for(PlotFileMiner miner : minerThreads){
             miner.stop();
             //miner.plotFile.addIncomplete();
             //LOGGER.info("Stopped mining {"+miner.plotFile.getUUID()+"} due to block change");
         }
-        minerThreads.clear();
+        */
+        //minerThreads.clear();
+        /* What is this non-sense
         this.processing = null;
         while(this.processing==null){
             this.processing = netStateService.getCurrentState();
             if(this.processing==null)try{Thread.sleep(500);}catch(Exception ex){}
         }
+        */
 
         deadline = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
-        for(PlotFile plotFile: plotService.getPlots()){
-            PlotFileMiner miner = new PlotFileMiner(plotFile);
-            minerThreads.add(miner);
-            executor.execute(miner);
+        // I Think we already have plot files...
+        for(PlotFile mPlotFile: mPlotFiles.getPlotFiles()){
+            // Pass the mPlotfile to a miner thats Async or something
+            //PlotFileMiner miner = new PlotFileMiner(plotFile);
+            //minerThreads.add(miner);
+            //executor.execute(miner);
+            // This should be AsyncTask Probably
         }
     }
-*/
+
     public static String GET(String url){
         InputStream inputStream = null;
         String result = "";
@@ -207,7 +219,7 @@ public class MiningService {
         return s.hasNext() ? s.next() : "";
     }
 
-    /*
+
     class CPUMiner implements Runnable{
         long address = 0;
 
@@ -224,7 +236,6 @@ public class MiningService {
                 return;
             }
 
-
             while(true){
                 long nonce = nextNonce();
 
@@ -234,9 +245,7 @@ public class MiningService {
                 }else if(poolType.equals(POOL_TYPE_URAY)){
                     checkPlotOffical(plot,nonce);
                 }
-
             }
-
         }
 
         public void checkPlotOffical(MiningPlot plot,long nonce){
@@ -263,11 +272,9 @@ public class MiningService {
         }
 
         public void checkPlotUray(MiningPlot plot,long nonce){
-
-
         }
     }
-*/
+
 
 /*
     class PlotFileMiner implements Runnable{
