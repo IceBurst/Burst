@@ -1,11 +1,13 @@
 package burstcoin.com.burst.mining;
 
+import android.annotation.TargetApi;
 import android.util.Log;
 import android.widget.Button;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import burstcoin.com.burst.BurstUtil;
 import burstcoin.com.burst.GetAsync;
 import burstcoin.com.burst.JSONCaller;
 import burstcoin.com.burst.R;
@@ -16,12 +18,16 @@ import nxt.crypto.Crypto;
 import nxt.util.Convert;
 
 import java.io.BufferedInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.annotation.Target;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.*;
 
 /**
@@ -38,21 +44,25 @@ public class MiningService {
     // Only Supporting official on initial release
     public static String POOL_TYPE_URAY="uray";
     public static String POOL_TYPE_OFFICAL="offical";
+
     public boolean running = false;
 
     // Used for the GetBlockInfo
     Timer mPoller;
     static int POLL_SECONDS = 3;
+
     String poolType;
 
-    String poolUrl = "http://pool.burst-team.us";
+    String poolUrl = "http://mobile.burst-team.us";
     String poolGetBlockInfo = "/burst?requestType=getMiningInfo";
 
     int minerCpuThreads = 1;
     boolean minerCpuEnabled;
     // This class is commented out
     //ArrayList<PlotFileMiner> minerThreads = new ArrayList<PlotFileMiner>();
+
     private PlotFiles mPlotFiles;
+    private String mNumericID;
     long lastShareSubmitTime;
     BigInteger deadline = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
     Random rand;
@@ -61,9 +71,11 @@ public class MiningService {
 
 
     // Constructor for the Mining Service
-    public MiningService (IntMiningStatus cb) {
+    public MiningService (IntMiningStatus cb, PlotFiles pf, String numeric) {
         mCallback = cb;
-        // Do some checks, if everything is good start auto-mining
+        mPlotFiles = pf;
+        mNumericID = numeric;
+        //ToDo: Do some checks, if everything is good start auto-mining
         //start();
     }
 
@@ -187,7 +199,9 @@ public class MiningService {
         // I Think we already have plot files...
         for(PlotFile mPlotFile: mPlotFiles.getPlotFiles()){
             // Pass the mPlotfile to a miner thats Async or something
-            //PlotFileMiner miner = new PlotFileMiner(plotFile);
+            PlotFileMiner miner = new PlotFileMiner(mPlotFile);
+            Thread mMiner = new Thread(miner);
+            mMiner.start();
             //minerThreads.add(miner);
             //executor.execute(miner);
             // This should be AsyncTask Probably
@@ -220,6 +234,7 @@ public class MiningService {
     }
 
 
+    /*
     class CPUMiner implements Runnable{
         long address = 0;
 
@@ -273,10 +288,9 @@ public class MiningService {
 
         public void checkPlotUray(MiningPlot plot,long nonce){
         }
-    }
+    }*/
 
 
-/*
     class PlotFileMiner implements Runnable{
 
         private PlotFile plotFile;
@@ -289,10 +303,15 @@ public class MiningService {
 
         public PlotFileMiner(PlotFile plotFile){
 
-            ByteBuffer buf = ByteBuffer.allocate(32 + 8);
+            //ByteBuffer buf = ByteBuffer.allocate(32 + 8);
+            ByteBuffer buf = ByteBuffer.allocate(64 + 8);   // 64bytes in the Sig, not 32
+
+            buf.put(mActiveBlock.genSig.getBytes());
+            buf.putLong(mActiveBlock.height);
+            /*
             buf.put(processing.getGensig());
             buf.putLong(processing.getHeightL());
-
+            */
             Shabal256 md = new Shabal256();
             md.update(buf.array());
             BigInteger hashnum = new BigInteger(1, md.digest());
@@ -302,43 +321,53 @@ public class MiningService {
 
         @Override
         public void run() {
+            String mPlotFileLocation = BurstUtil.getPathToSD() + '/' +plotFile.getFileName();
+            try {
 
-            try(RandomAccessFile f = new RandomAccessFile(plotFile.getPlotFile(), "r")) {
-                long chunks = plotFile.getPlots()/ plotFile.getStaggeramt();
+                RandomAccessFile f = new RandomAccessFile(mPlotFileLocation, "r");
+                //long chunks = plotFile.getPlots()/ plotFile.getStaggeramt();
+                long chunks = 4096;  // <-- To ffigure out what this really is, looks like duplicate work to me
                 for(long i = 0; i < chunks; i++) {
                     f.seek((i * plotFile.getStaggeramt() * MiningPlot.PLOT_SIZE) + (scoopnum * plotFile.getStaggeramt() * MiningPlot.SCOOP_SIZE));
+                    Log.d(TAG,"Chunk "+i+": Seeked to Position:"+ (i * plotFile.getStaggeramt() * MiningPlot.PLOT_SIZE) + (scoopnum * plotFile.getStaggeramt() * MiningPlot.SCOOP_SIZE));
                     byte[] chunk = new byte[(int) (plotFile.getStaggeramt() * MiningPlot.SCOOP_SIZE)];
+                    //Log.d(TAG,"Read from disk:" + plotFile.getStaggeramt() * MiningPlot.SCOOP_SIZE + " bytes");
                     f.readFully(chunk);
-                    if(poolType.equals(POOL_TYPE_URAY)) {
-                        checkChunkPoolUray(chunk,plotFile.getStartnonce() + (i * plotFile.getStaggeramt()));
-                    }else if(poolType.equals(POOL_TYPE_OFFICAL)){
+                    Log.d(TAG,"We are checking this chunk:"+ chunk.toString());
+                    // Set to only one pool type to start
+                    //if(poolType.equals(POOL_TYPE_URAY)) {
+                    //    checkChunkPoolUray(chunk,plotFile.getStartnonce() + (i * plotFile.getStaggeramt()));
+                    //}else if(poolType.equals(POOL_TYPE_OFFICAL)){
                         checkChunkPoolOffical(chunk,plotFile.getStartnonce() + (i * plotFile.getStaggeramt()));
-                    }
-                    if(!running)return;
+                    //}
+                    // Put this next part back in if we interupt
+                    //if(!running)return;
                 }
             } catch (FileNotFoundException e) {
-                LOGGER.info("Cannot open file: " + plotFile.getPlotFile().getName());
-                e.printStackTrace();
+                Log.e(TAG, "Cannot open file: " + mPlotFileLocation);
+                //e.printStackTrace();
             } catch (IOException e) {
-                LOGGER.info("Error reading file: " + plotFile.getPlotFile().getName());
+                Log.e(TAG,"Error reading file: " + mPlotFileLocation);
             }
 
-            LOGGER.info("Finished mining {"+plotFile.getUUID()+"}");
-            plotFile.addChecked();
-            minerThreads.remove(this);
+            Log.d(TAG, "Finished mining a plot file"); // {"+plotFile.getUUID()+"}");
+            //plotFile.addChecked();
+            //minerThreads.remove(this);
         }
 
+      /*
         private void checkChunkPoolUray(byte[] chunk,long chunk_start_nonce){
             Shabal256 md = new Shabal256();
             BigInteger lowest = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
             long lowestscoop = 0;
             for(long i = 0; i < plotFile.getStaggeramt(); i++) {
                 md.reset();
-                md.update(processing.getGensig());
+                md.update(mActiveBlock.genSig.getBytes());
                 md.update(chunk, (int) (i * MiningPlot.SCOOP_SIZE), MiningPlot.SCOOP_SIZE);
                 byte[] hash = md.digest();
                 BigInteger num = new BigInteger(1, new byte[] {hash[7], hash[6], hash[5], hash[4], hash[3], hash[2], hash[1], hash[0]});
-                BigInteger deadline = num.divide(BigInteger.valueOf(processing.getBaseTargetL()));
+                //BigInteger deadline = num.divide(BigInteger.valueOf(processing.getBaseTargetL()));
+                BigInteger deadline = num.divide(BigInteger.valueOf(mActiveBlock.height));
 
                 int compare = deadline.compareTo(lowest);
                 if(compare < 0) {
@@ -347,22 +376,27 @@ public class MiningService {
                 }
                 if(!running)return;
             }
-            registerBestShareForChunk(lowest,lowestscoop,plotFile);
-        }
+            // We would submit here
+            //registerBestShareForChunk(lowest,lowestscoop,plotFile);
+        }*/
+
 
         private void checkChunkPoolOffical(byte[] chunk,long chunk_start_nonce){
             Shabal256 md = new Shabal256();
             for(long i = 0; i < plotFile.getStaggeramt(); i++) {
                 md.reset();
-                md.update(processing.getGensig());
+                md.update(mActiveBlock.genSig.getBytes());
                 md.update(chunk, (int) (i * MiningPlot.SCOOP_SIZE), MiningPlot.SCOOP_SIZE);
                 byte[] hash = md.digest();
                 BigInteger num = new BigInteger(1, new byte[] {hash[7], hash[6], hash[5], hash[4], hash[3], hash[2], hash[1], hash[0]});
-                BigInteger deadline = num.divide(BigInteger.valueOf(processing.getBaseTargetL()));
-                int compare = deadline.compareTo(BigInteger.valueOf(processing.getTargetDeadlineL()));
+                BigInteger deadline = num.divide(BigInteger.valueOf(mActiveBlock.height));
+                Log.d(TAG, "We Generated a deadline of:"+deadline);                                 // We are generating 4096 deadlines that are all the same?
+                int compare = deadline.compareTo(BigInteger.valueOf(mActiveBlock.targetDeadline));
 
                 if(compare <= 0) {
-                    shareExecutor.execute(new SubmitShare(chunk_start_nonce+i, plotFile,deadline));
+                    //shareExecutor.execute(new SubmitShare(chunk_start_nonce+i, plotFile,deadline));
+                    Log.d(TAG, "Found a better submission @ " + chunk_start_nonce + " with a DL of:" + deadline);
+                    SubmitShare(String.valueOf(chunk_start_nonce),"ID");
                 }
                 if(!running)return;
             }
@@ -370,7 +404,7 @@ public class MiningService {
         }
 
     }
-*/
+
 
     /*
     private class SubmitShare implements  Runnable{
@@ -393,35 +427,58 @@ public class MiningService {
             this.address = address;
         }
 
-
         @Override
         public void run() {
-            String shareRequest = Convert.toUnsignedLong(plotFile.getAddress()) + ":" + nonce + ":" + processing.getHeight()+" deadline {"+deadline+"}";
-            LOGGER.info("Submitting share {"+shareRequest+"}");
+            String shareRequest = Convert.toUnsignedLong(plotFile.getAddress()) + ":" + nonce + ":" + mActiveBlock.height + " deadline {"+deadline+"}";
+            //LOGGER.info("Submitting share {"+shareRequest+"}");
+
+            // ToDo: This should all be done with our Async Classes
+            Log.d(TAG, "Submitting Share");
             try {
                 if(poolType.equals(POOL_TYPE_URAY)) {
                     String request = poolUrl + "/burst?requestType=submitNonce&secretPhrase=pool-mining&nonce=" + Convert.toUnsignedLong(nonce) + "&accountId=" + Convert.toUnsignedLong(address);
                     String response = restTemplate.postForObject(request, shareRequest, String.class);
                     LOGGER.info("Reponse {"+response+"}}");
                     if(plotFile==null){
-                        LOGGER.info("Submitted CPU Share.");
+                        Log.d(TAG,"Submitted CPU Share.");
                     }else{
-                        plotFile.addShare();
+                        //plotFile.addShare();
                     }
                 }else if(poolType.equals(POOL_TYPE_OFFICAL)){
                     shareRequest = Convert.toUnsignedLong(address)+":"+Convert.toUnsignedLong(nonce)+":"+processing.getHeight()+"\n";
                     String response = restTemplate.postForObject(poolUrl + "/pool/submitWork",shareRequest,String.class);
                     LOGGER.info("Reponse {"+response+"}}");
                     if(plotFile==null){
-                        LOGGER.info("Submitted CPU Share.");
+                        Log.d(TAG,"Submitted CPU Share.");
                     }else{
-                        plotFile.addShare();
+                        //plotFile.addShare();
                     }                }
                 lastShareSubmitTime = System.currentTimeMillis();
             }catch(Exception ex){
                 Log.d(TAG, "Failed to submitshare{"+shareRequest+"}");
             }
         }
-    }
-    */
+    }*/
+
+        public void SubmitShare(String mNonce, String mNumericID) {
+            String URL = poolUrl + "/burst?requestType=submitNonce&secretPhrase=pool-mining&nonce=" + mNonce + "&accountId=" + mNumericID;
+            GetAsync jsonCall = new GetAsync(URL) {
+                @Override
+                protected void onPostExecute (JSONObject json) {
+                    if (json != null) {
+                        try {
+                            Log.d(TAG,json.toString());
+                            String mRespond = json.getString("account");
+                            mCallback.notice("SUBMITNONCE", "SUCCESS");
+                        } catch (JSONException e) {
+                            mCallback.notice("SUBMITNONCE", "INVALID");
+                        }
+                    } else {
+                        mCallback.notice("SUBMITNONCE", "NULL");
+                    }
+                }
+            };
+            jsonCall.execute();
+        }
+
 }

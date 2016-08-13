@@ -22,6 +22,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
 
     final static String TAG = "MiningActivity";
     final static String sPoolServer = "mobile.burst-team.us";
+    final static String sPoolNumericID = "18401070918313114651";
 
     private MiningService mMiningService;
     private Plotter mPlotter;
@@ -54,9 +55,9 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
         mBtnMiningAction = (Button) findViewById(R.id.btnMinerOp);
         mBtnSetPool = (Button) findViewById(R.id.btnSetPool);
 
-        mMiningService = new MiningService(this, mPlotFiles);
         mPlotter = new Plotter(mNumericID);
         mPlotFiles = new PlotFiles(BurstUtil.getPathToSD(), mNumericID);
+        mMiningService = new MiningService(this, mPlotFiles, mNumericID);
 
         int mPlotCt = mPlotter.getPlotSize();
         if (mPlotCt > 0) {
@@ -108,11 +109,14 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
 
                 }
                 // Send the Request
-                BurstUtil.setRewardAssignment("16647933376790760136", mPassPhrase); // <-- Tie our passphrase to the Mining pool payout
+                BurstUtil.setRewardAssignment("18401070918313114651", mPassPhrase); // <-- Tie our passphrase to the Mining pool payout
             }
         });
         // ToDo: Make this better in the future, this is hacky and only allows a single pool service
-        // Mobile Pool: R4QA-8GHZ-DSUZ-GRC4G   --  16647933376790760136
+        // DO NOT USE ANY MORE ! Mobile Pool: R4QA-8GHZ-DSUZ-GRC4G   --  16647933376790760136
+        // Mobile Pool: 7Z2V-J9CF-NCW9-HWFRY  - 18401070918313114651
+        //  Points to EU.Pool Now
+
         // https://mobile.burst-team.us:8125/burst?requestType=setRewardRecipient
         // This is normally a post
         // Android Miner BURST-4BS9-D8RC-MTMA-26VUW  --  1039034475383695111
@@ -126,8 +130,6 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
         // Push the set button, lock out for 4 blocks, we can update in the back ground
         getRewardID();
 
-        // ToDo: This is just to try crap out, needs to be wrapped in setReward == True && GBPlot > 0 == True
-        //mRewardSet = true;
         if (mPlotCt > 0 && mRewardSet) {
             mMiningService.start();
         }
@@ -171,7 +173,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                                 mBtnSetPool.setText( Long.toString(mToGo) + " Confirms Remaining");
                                 if (mToGo == 0) {
                                     mFinalConfirm = 0;
-                                    mRewardID = "16647933376790760136"; // More Hackyneess
+                                    mRewardID = "18401070918313114651"; // More Hackyneess
                                     validateRewardID();
                                 }
                             } //mMiningService.mActiveBlock.height + 4;
@@ -195,7 +197,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
     }
 
     private void validateRewardID() {
-        if(mRewardID.equals("16647933376790760136")) {   // <-- MPool
+        if(mRewardID.equals("18401070918313114651")) {   // <-- MPool
             mRewardSet = true;
             mBtnSetPool.setEnabled(false);
             mBtnSetPool.setVisibility(View.INVISIBLE);

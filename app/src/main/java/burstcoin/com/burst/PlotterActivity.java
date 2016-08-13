@@ -67,10 +67,13 @@ public class PlotterActivity extends AppCompatActivity implements IntPlotStatus 
         mBtnPlot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // First thing we need is the value of the slider
+                final int mGBToPlot = mSizeBar.getProgress();
                 new Thread() {
                     @Override
                     public void run() {
-                        mPlotter.plot1GB();
+                        //mPlotter.plot1GB();
+                        mPlotter.plotGBs(mGBToPlot);
                     }
                 }.start();
             }

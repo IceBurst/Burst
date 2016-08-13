@@ -13,7 +13,7 @@ import burstcoin.com.burst.BurstUtil;
  */
 public class PlotFile {
 
-    public static int NonceToComplete = 4096;  // This will have to be 4096 in the end
+    public static int NonceToComplete = 4;  // This will have to be 4096 in the end
 
     private IntPlotStatus mCallback;
     private String mFileName;       // Complete File Name
@@ -55,34 +55,19 @@ public class PlotFile {
         FileOutputStream out;
 
         mCallback.notice("PLOTTING", "NONCE", "0");
-        // Do the plot loop in here
         mFileName = mNumericID + '_' + Long.toString(mStart) + '_' + Long.toString(new Long(NonceToComplete)+mStart) + '_' + Long.toString(mStgr);
         String mPlotFile = BurstUtil.getPathToSD() + '/' + mFileName;
         try {
-            // We need the full path here
             Log.d(TAG, "Writing to:" + mPlotFile);
-            out = new FileOutputStream(mPlotFile); // mFileName
+            out = new FileOutputStream(mPlotFile);
         } catch (IOException ioex) {
-            // We should put an error here if osmething bad happens
+
             return;
         }
-        int staggeramt = 1; // Fix to get us through this with out changing code
-        byte[] outputbuffer = new byte[(int) (staggeramt * SinglePlot.PLOT_SIZE)]; // <-- this is 1 nonce
-        // java.lang.ArrayIndexOutOfBoundsException: src.length=262144 srcPos=262080 dst.length=262144 dstPos=262144 length=64
-        /* this crashes with the following data
-07-20 17:54:56.829 2856-2856/burstcoin.com.burst D/PlotFile: 0: This is iteration #:4095
-07-20 17:54:56.829 2856-2856/burstcoin.com.burst D/PlotFile: 1: plot.data.length is:262144
-07-20 17:54:56.829 2856-2856/burstcoin.com.burst D/PlotFile: 2: starting copy from 262080
-07-20 17:54:56.829 2856-2856/burstcoin.com.burst D/PlotFile: 3: outputbuffer has a size of: 262144
-07-20 17:54:56.829 2856-2856/burstcoin.com.burst D/PlotFile: 4: Starting to copy at 262144 of the output buffer we are starting at the last element of course this fails
-07-20 17:54:56.829 2856-2856/burstcoin.com.burst D/PlotFile: 5: Trying to Copy 64 bytes
-
-         */
-
-        for (int mWorkingNonce = 0;mWorkingNonce < NonceToComplete ;mWorkingNonce++){   // This will need to be 4096
-            // I get it they are biuding the buffer up to the stagger size before writing, this is more effecient but we dont care
-
-            SinglePlot plot = new SinglePlot(address, mNonce);
+        int staggeramt = 1;     // We are going to plot in simple 1NONCE, 256K chunks
+        byte[] outputbuffer = new byte[(int) (staggeramt * SinglePlot.PLOT_SIZE)];              // <-- this is 1 nonce in a byte[]
+        for (int mWorkingNonce = 0;mWorkingNonce < NonceToComplete ;mWorkingNonce++){
+            SinglePlot plot = new SinglePlot(address, mWorkingNonce);
             Log.d(TAG, "Plotting Nonce #:" + mWorkingNonce + " of " + NonceToComplete);
             // Need to understand this a little better
             // why do we iterate through?  Why not just copy the whole block in?
@@ -132,4 +117,14 @@ public class PlotFile {
             throw new NumberFormatException(s+" is to big!");
         return b.longValue();
     }
+
+    public long getStaggeramt() {
+        return 1;
+    }
+
+    public long getStartnonce() {
+        return mStart;
+    }
+
+    public long getAddress () {return address; }
 }

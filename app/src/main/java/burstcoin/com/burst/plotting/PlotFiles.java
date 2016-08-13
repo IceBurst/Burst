@@ -24,7 +24,7 @@ public class PlotFiles {
         mPath = path;
         mNumericID = numericID;
         mPlotFiles = new ArrayList<PlotFile>();
-        getPlotFiles();
+        refreshPlotFiles();
     }
 
     // Returns the number of plots

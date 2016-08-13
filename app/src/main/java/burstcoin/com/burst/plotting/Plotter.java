@@ -53,9 +53,16 @@ public class Plotter {
         PlotFile mNewPlot = new PlotFile(callback);
         mNewPlot.setNumericID(mNumericID);
         mNewPlot.setStartNonce(mPlotFiles.size()*PlotFile.NonceToComplete);
-        // Set a wait some how
         mNewPlot.plot();
-        // This is now handled by the seperate thread
-        //callback.notice("PLOTTER", "SUCCESS", "1GB PLOT CREATED");
+    }
+
+    public void plotGBs(int mGBs) {
+        int mStartingGB = mPlotFiles.size();
+        for (int i = 0; i<mGBs; i++) {
+            PlotFile mNewPlot = new PlotFile(callback);
+            mNewPlot.setNumericID(mNumericID);
+            mNewPlot.setStartNonce((mStartingGB+i) * PlotFile.NonceToComplete);
+            mNewPlot.plot();
+        }
     }
 }
