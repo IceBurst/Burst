@@ -13,7 +13,7 @@ import burstcoin.com.burst.BurstUtil;
  */
 public class PlotFile {
 
-    public static int NonceToComplete = 4096;  // This will have to be 4096 in the end
+    public static int NonceToComplete = 1; //4096;  // This will have to be 4096 in the end
 
     private IntPlotStatus mCallback;
     private String mFileName;       // Complete File Name
@@ -43,7 +43,11 @@ public class PlotFile {
         // Do some math to check that size is = to nonce * nonce size or error
     }
 
-    public void setNumericID(String numericID) { mNumericID = numericID; }
+    public void setNumericID(String numericID) {
+        mNumericID = numericID;
+        address = Long.valueOf(numericID);
+    }
+
     public void setStartNonce(long start) {mStart = start;}
     public String getFileName() {
         return this.mFileName;
@@ -87,13 +91,8 @@ public class PlotFile {
                 //java.lang.ArrayIndexOutOfBoundsException: src.length=262144 srcPos=262080 dst.length=262144 dstPos=262144 length=64
             }*/
 
-            /* complete success
-            root@generic_x86_64:/storage/sdcard # ls -l
-                    -rwxrwx--- root     sdcard_r 33554432 2016-07-20 18:04 14041956000257417609_0_128_1
-            */
-
             try {
-                //out.write(outputbuffer);
+
                 out.write(plot.data);
                 out.flush();
             } catch (IOException ioex) {

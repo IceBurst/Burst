@@ -1,5 +1,7 @@
 package burstcoin.com.burst.plotting;
 
+import android.util.Log;
+
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import fr.cryptohash.Shabal256;
@@ -12,14 +14,15 @@ import fr.cryptohash.Shabal256;
 public class SinglePlot {
     public static int HASH_SIZE = 32;
     public static int HASHES_PER_SCOOP = 2;
-    public static int SCOOP_SIZE = HASHES_PER_SCOOP * HASH_SIZE;
-    public static int SCOOPS_PER_PLOT = 4096; // original 1MB/plot = 16384
-    public static int PLOT_SIZE = SCOOPS_PER_PLOT * SCOOP_SIZE;
+    public static int SCOOP_SIZE = HASHES_PER_SCOOP * HASH_SIZE;    // 64
+    public static int SCOOPS_PER_PLOT = 4096;                       // original 1MB/plot = 16384
+    public static int PLOT_SIZE = SCOOPS_PER_PLOT * SCOOP_SIZE;     // 4096*64 = 262144 ; 256Kb
 
     public static int HASH_CAP = 4096;
 
     public byte[] data = new byte[PLOT_SIZE];
 
+    // Plotting Design based on URL: https://web.burst-team.us/index.php/about/
     public SinglePlot(long addr, long nonce) {
         ByteBuffer base_buffer = ByteBuffer.allocate(16);
         base_buffer.putLong(addr);
@@ -39,9 +42,10 @@ public class SinglePlot {
         }
         md.reset();
         md.update(gendata);
-        byte[] finalhash = md.digest();
+        byte[] mFinalHash = md.digest();
+
         for(int i = 0; i < PLOT_SIZE; i++) {
-            data[i] = (byte) (gendata[i] ^ finalhash[i % HASH_SIZE]);
+            data[i] = (byte) (gendata[i] ^ mFinalHash[i % HASH_SIZE]);
         }
     }
 
