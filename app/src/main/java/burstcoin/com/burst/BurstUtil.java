@@ -18,6 +18,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -48,6 +49,46 @@ public class BurstUtil {
     }
 
     public BurstUtil() {}
+
+    // Createa  Human readable Deadline from a provided BigInteger
+    public static String BigIntToHumanReadableDate(BigInteger mBI) {
+        String mDate = "";
+        long mDL = mBI.longValue();
+
+        final long SecInMin = 60;
+        final long SecInHr = 2600;
+        final long SecInDay = 86400;
+        final long SecInMon = 2592000;      // Defined as 30 Days
+        final long SecInYear = 31536000;    // defined as 365 days
+        if(mDL > SecInYear) {
+            long mYR = (mDL / SecInYear);
+            mDate = String.valueOf(mYR) + " Years";
+            mDL = mDL - (SecInYear * mYR);
+        }
+        if(mDL > SecInMon) {
+            long mMon = (mDL / SecInMon);
+            mDate += " " + String.valueOf(mMon) + " Months";
+            mDL = mDL - (SecInMon * mMon);
+        }
+        if(mDL > SecInDay) {
+            long mDay = (mDL / SecInDay);
+            mDate += " " + String.valueOf(mDay) + " Days";
+            mDL = mDL - (SecInDay * mDay);
+        }
+        if (mDL > SecInHr) {
+            long mHR = (mDL / SecInHr);
+            mDate += " " + String.valueOf(mHR) + " Hrs";
+            mDL = mDL - (SecInHr * mHR);
+        }
+        if (mDL > SecInMin) {
+            long mMin = (mDL / SecInMin);
+            mDate += " " + String.valueOf(mMin) + " Mins";
+            mDL = mDL - (SecInMin * mMin);
+        }
+        mDate += " " + mDL + " Sec";
+
+        return mDate;
+    }
 
     // ToDo: Requires Testing
     // Could be very useful for setting up plot sizes
