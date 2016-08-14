@@ -13,7 +13,7 @@ import burstcoin.com.burst.BurstUtil;
  */
 public class PlotFile {
 
-    public static int NonceToComplete = 1; //4096;  // This will have to be 4096 in the end
+    public static int NonceToComplete = 4096;  // This will have to be 4096 in the end
 
     private IntPlotStatus mCallback;
     private String mFileName;       // Complete File Name
