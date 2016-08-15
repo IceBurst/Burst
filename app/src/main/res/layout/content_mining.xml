@@ -16,7 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Plot Size"
+        android:text="Mining Plot Size"
         android:id="@+id/txtStaticPlotSize"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
@@ -37,9 +37,10 @@
         android:text="Set Pool"
         android:id="@+id/btnSetPool"
         android:background="@color/colorAccent"
-        android:layout_above="@+id/txtCurrentBlock"
+        android:minWidth="150dip"
+        android:layout_alignBottom="@+id/txtPoolSvr"
         android:layout_centerHorizontal="true"
-        android:layout_margin="12dp" />
+         />
 
     <TextView
         android:layout_width="wrap_content"
@@ -66,23 +67,34 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Current Block: Unknown"
         android:id="@+id/txtCurrentBlock"
-        android:layout_above="@+id/txtCurrentDL"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="12dp" />
+
+        android:layout_marginTop="46dp"
+        android:layout_below="@+id/txtPoolSvr"
+        android:layout_centerHorizontal="true" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="My Deadline: N/A"
+        android:text="Best Deadline: "
+        android:id="@+id/txtStaticCurrentDL"
+        android:layout_below="@+id/txtCurrentBlock"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="N/A"
         android:id="@+id/txtCurrentDL"
-        android:layout_centerVertical="true"
+        android:layout_below="@+id/txtStaticCurrentDL"
         android:layout_centerHorizontal="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Start Mining"
+        android:minWidth="150dip"
         android:id="@+id/btnMinerOp"
         android:layout_marginBottom="65dp"
         android:background="@color/colorAccent"
