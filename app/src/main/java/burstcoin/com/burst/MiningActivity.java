@@ -84,8 +84,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
         */
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // Lets tell the user how many plots we have
-
+        // Start or Stop Mining Button
         mBtnMiningAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -96,6 +95,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
             }
         });
 
+        // Set Mining Pool Button
         mBtnSetPool.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -112,8 +112,8 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                 BurstUtil.setRewardAssignment("18401070918313114651", mPassPhrase); // <-- Tie our passphrase to the Mining pool payout
             }
         });
+
         // ToDo: Make this better in the future, this is hacky and only allows a single pool service
-        // DO NOT USE ANY MORE ! Mobile Pool: R4QA-8GHZ-DSUZ-GRC4G   --  16647933376790760136
         // Mobile Pool: 7Z2V-J9CF-NCW9-HWFRY  - 18401070918313114651
         //  Points to EU.Pool Now
 
@@ -127,7 +127,6 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
         // {"rewardRecipient":"1039034475383695111","requestProcessingTime":0}
         // rewardRecipient has to be ^^^^^^^^^^^^  Otherwise tell them it's not set and give them a set button.
 
-        // Push the set button, lock out for 4 blocks, we can update in the back ground
         getRewardID();
 
         if (mPlotCt > 0 && mRewardSet) {

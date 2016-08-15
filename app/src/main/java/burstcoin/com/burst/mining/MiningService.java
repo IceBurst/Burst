@@ -64,7 +64,7 @@ public class MiningService {
     private PlotFiles mPlotFiles;
     private String mNumericID;
     long lastShareSubmitTime;
-    BigInteger deadline = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+    BigInteger mBestdeadline = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
     Random rand;
     boolean startedCPUMining = false;
     private IntMiningStatus mCallback;
@@ -87,14 +87,12 @@ public class MiningService {
         mPoller.schedule( new TimerTask() {
             public void run() {
                 // This is where we poll the webserver for block data
-                Log.d(TAG, "Trying:"+poolUrl+poolGetBlockInfo);
+                //Log.d(TAG, "Trying:"+poolUrl+poolGetBlockInfo);
                 String mBlockData = GET(poolUrl+poolGetBlockInfo);
-                Log.d(TAG, mBlockData);  // Looks like JSON as we expected
+                //Log.d(TAG, mBlockData);
                 try {
                     JSONObject mJSONBlockData = new JSONObject(mBlockData);
-                    // We are exploding instead off going into our if, I dont understand why
                     if (mActiveBlock.height != mJSONBlockData.getLong("height")) {
-                        // We are on a new block, lets work hard!
                         mActiveBlock.height = Long.parseLong(mJSONBlockData.getString("height"));
                         mActiveBlock.genSig = mJSONBlockData.getString("generationSignature");
                         mActiveBlock.baseTarget = Long.parseLong(mJSONBlockData.getString("baseTarget"));
@@ -195,7 +193,7 @@ public class MiningService {
         }
         */
 
-        deadline = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+        mBestdeadline = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
         // I Think we already have plot files...
         for(PlotFile mPlotFile: mPlotFiles.getPlotFiles()){
             // Pass the mPlotfile to a miner thats Async or something
@@ -291,22 +289,25 @@ public class MiningService {
     }*/
 
 
-    class PlotFileMiner implements Runnable{
+    class PlotFileMiner implements Runnable {
 
         private PlotFile plotFile;
         private int scoopnum;
-        private boolean running=true;
+        private boolean running = true;
 
-        public void stop(){
-            running=false;
+        public void stop() {
+            running = false;
         }
 
-        public PlotFileMiner(PlotFile plotFile){
+        public PlotFileMiner(PlotFile plotFile) {
 
-            //ByteBuffer buf = ByteBuffer.allocate(32 + 8);
-            ByteBuffer buf = ByteBuffer.allocate(64 + 8);   // 64bytes in the Sig, not 32
+            ByteBuffer buf = ByteBuffer.allocate(32 + 8);
 
-            buf.put(mActiveBlock.genSig.getBytes());
+            // d7789cee10c3a0bc455edf8edd0862f6967dad29ea4637e4e5ad4bfc6e21da79  <-- Sig Sample
+            //   0         10        20         30       40       50       60
+            // Need to Convert the ASCii into a Hex(Byte) equivilant
+
+            buf.put(BurstUtil.stringToBytes(mActiveBlock.genSig));
             buf.putLong(mActiveBlock.height);
             /*
             buf.put(processing.getGensig());
@@ -321,90 +322,68 @@ public class MiningService {
 
         @Override
         public void run() {
-            String mPlotFileLocation = BurstUtil.getPathToSD() + '/' +plotFile.getFileName();
+            String mPlotFileLocation = BurstUtil.getPathToSD() + '/' + plotFile.getFileName();
             try {
 
                 RandomAccessFile f = new RandomAccessFile(mPlotFileLocation, "r");
                 //long chunks = plotFile.getPlots()/ plotFile.getStaggeramt();
-                long chunks = 4096;  // <-- To ffigure out what this really is, looks like duplicate work to me
-                for(long i = 0; i < chunks; i++) {
+                long chunks = 4096;
+                BigInteger lowest = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+                BigInteger mDeadLine;
+                for (long i = 0; i < chunks; i++) {
                     f.seek((i * plotFile.getStaggeramt() * MiningPlot.PLOT_SIZE) + (scoopnum * plotFile.getStaggeramt() * MiningPlot.SCOOP_SIZE));
-                    Log.d(TAG,"Chunk "+i+": Seeked to Position:"+ (i * plotFile.getStaggeramt() * MiningPlot.PLOT_SIZE) + (scoopnum * plotFile.getStaggeramt() * MiningPlot.SCOOP_SIZE));
+                    //Log.d(TAG,"Chunk "+i+": Seeked to Position:"+ (i * plotFile.getStaggeramt() * MiningPlot.PLOT_SIZE) + (scoopnum * plotFile.getStaggeramt() * MiningPlot.SCOOP_SIZE));
                     byte[] chunk = new byte[(int) (plotFile.getStaggeramt() * MiningPlot.SCOOP_SIZE)];
                     //Log.d(TAG,"Read from disk:" + plotFile.getStaggeramt() * MiningPlot.SCOOP_SIZE + " bytes");
                     f.readFully(chunk);
-                    Log.d(TAG,"We are checking this chunk:"+ chunk.toString());
                     // Set to only one pool type to start
                     //if(poolType.equals(POOL_TYPE_URAY)) {
-                    //    checkChunkPoolUray(chunk,plotFile.getStartnonce() + (i * plotFile.getStaggeramt()));
+                    //checkChunkPoolUray(chunk, plotFile.getStartnonce() + (i * plotFile.getStaggeramt()));
                     //}else if(poolType.equals(POOL_TYPE_OFFICAL)){
-                        checkChunkPoolOffical(chunk,plotFile.getStartnonce() + (i * plotFile.getStaggeramt()));
+                    long mWorkingNonce = plotFile.getStartnonce() + (i * plotFile.getStaggeramt());
+                    mDeadLine = getDeadLineForNonce(chunk,mWorkingNonce);
                     //}
-                    // Put this next part back in if we interupt
-                    //if(!running)return;
+
+                    if (lowest.compareTo(mDeadLine) == 1) {
+                        // We always fall in here because checkChuck is fresh everytime!
+                        lowest = mDeadLine;
+                        Log.d(TAG, "New Best Deadline is Nonce:"+ mWorkingNonce + " of: "+ BurstUtil.BigIntToHumanReadableDate(mDeadLine));
+                    }
+
+                    // ToDo: Strengthen this to check Target Deadline && Best Submitted, Maybe we should loop it out to a caller
+                    int compare = mDeadLine.compareTo(BigInteger.valueOf(mActiveBlock.targetDeadline));
+                    if(compare <= 0) {
+                        // Pass it back to see if it's the best to submit
+                        //Log.d(TAG, "Found a better submission @ " + mWorkingNonce + " with a DL of:" + deadline);
+                        //SubmitShare(chunk_start_nonce+i, mNumericID);
+                    }
+                    if(!running)return;
                 }
             } catch (FileNotFoundException e) {
                 Log.e(TAG, "Cannot open file: " + mPlotFileLocation);
                 //e.printStackTrace();
             } catch (IOException e) {
-                Log.e(TAG,"Error reading file: " + mPlotFileLocation);
+                Log.e(TAG, "Error reading file: " + mPlotFileLocation);
             }
 
-            Log.d(TAG, "Finished mining a plot file"); // {"+plotFile.getUUID()+"}");
+            Log.d(TAG, "Finished mining a plot file:" + plotFile.getFileName());
             //plotFile.addChecked();
             //minerThreads.remove(this);
         }
 
-      /*
-        private void checkChunkPoolUray(byte[] chunk,long chunk_start_nonce){
+        private BigInteger getDeadLineForNonce(byte[] chunk,long chunk_start_nonce){
             Shabal256 md = new Shabal256();
-            BigInteger lowest = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
-            long lowestscoop = 0;
+            BigInteger deadline = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
             for(long i = 0; i < plotFile.getStaggeramt(); i++) {
                 md.reset();
-                md.update(mActiveBlock.genSig.getBytes());
+                md.update(BurstUtil.stringToBytes(mActiveBlock.genSig));
                 md.update(chunk, (int) (i * MiningPlot.SCOOP_SIZE), MiningPlot.SCOOP_SIZE);
                 byte[] hash = md.digest();
                 BigInteger num = new BigInteger(1, new byte[] {hash[7], hash[6], hash[5], hash[4], hash[3], hash[2], hash[1], hash[0]});
-                //BigInteger deadline = num.divide(BigInteger.valueOf(processing.getBaseTargetL()));
-                BigInteger deadline = num.divide(BigInteger.valueOf(mActiveBlock.height));
-
-                int compare = deadline.compareTo(lowest);
-                if(compare < 0) {
-                    lowest = deadline;
-                    lowestscoop = chunk_start_nonce + i;
-                }
-                if(!running)return;
+                deadline = num.divide(BigInteger.valueOf(mActiveBlock.baseTarget));
             }
-            // We would submit here
-            //registerBestShareForChunk(lowest,lowestscoop,plotFile);
-        }*/
-
-
-        private void checkChunkPoolOffical(byte[] chunk,long chunk_start_nonce){
-            Shabal256 md = new Shabal256();
-            for(long i = 0; i < plotFile.getStaggeramt(); i++) {
-                md.reset();
-                md.update(mActiveBlock.genSig.getBytes());
-                md.update(chunk, (int) (i * MiningPlot.SCOOP_SIZE), MiningPlot.SCOOP_SIZE);
-                byte[] hash = md.digest();
-                BigInteger num = new BigInteger(1, new byte[] {hash[7], hash[6], hash[5], hash[4], hash[3], hash[2], hash[1], hash[0]});
-                BigInteger deadline = num.divide(BigInteger.valueOf(mActiveBlock.height));
-                Log.d(TAG, "We Generated a deadline of:"+deadline);                                 // We are generating 4096 deadlines that are all the same?
-                int compare = deadline.compareTo(BigInteger.valueOf(mActiveBlock.targetDeadline));
-
-                if(compare <= 0) {
-                    //shareExecutor.execute(new SubmitShare(chunk_start_nonce+i, plotFile,deadline));
-                    Log.d(TAG, "Found a better submission @ " + chunk_start_nonce + " with a DL of:" + deadline);
-                    SubmitShare(String.valueOf(chunk_start_nonce),"ID");
-                }
-                if(!running)return;
-            }
-
+            return deadline;
         }
-
-    }
-
 
     /*
     private class SubmitShare implements  Runnable{
@@ -447,6 +426,7 @@ public class MiningService {
                 }else if(poolType.equals(POOL_TYPE_OFFICAL)){
                     shareRequest = Convert.toUnsignedLong(address)+":"+Convert.toUnsignedLong(nonce)+":"+processing.getHeight()+"\n";
                     String response = restTemplate.postForObject(poolUrl + "/pool/submitWork",shareRequest,String.class);
+                                                                                 ^^-- This is not part of NXT
                     LOGGER.info("Reponse {"+response+"}}");
                     if(plotFile==null){
                         Log.d(TAG,"Submitted CPU Share.");
@@ -460,25 +440,35 @@ public class MiningService {
         }
     }*/
 
-        public void SubmitShare(String mNonce, String mNumericID) {
-            String URL = poolUrl + "/burst?requestType=submitNonce&secretPhrase=pool-mining&nonce=" + mNonce + "&accountId=" + mNumericID;
-            GetAsync jsonCall = new GetAsync(URL) {
-                @Override
-                protected void onPostExecute (JSONObject json) {
-                    if (json != null) {
-                        try {
-                            Log.d(TAG,json.toString());
-                            String mRespond = json.getString("account");
-                            mCallback.notice("SUBMITNONCE", "SUCCESS");
-                        } catch (JSONException e) {
-                            mCallback.notice("SUBMITNONCE", "INVALID");
-                        }
-                    } else {
-                        mCallback.notice("SUBMITNONCE", "NULL");
-                    }
-                }
-            };
-            jsonCall.execute();
-        }
+        public void SubmitShare(Long mNonce, String mNumericID) {
+            // ToDo: Validate that is lower than a chunk from all other plots before submitting
+            // ToDo: Wrap in a check, then figure out the NULL Pointer, less to crash is easier to find in this case
 
+            // Also check the deadline supported by the pool
+            String URL = poolUrl + "/burst/?requestType=submitNonce&secretPhrase=pool-mining&nonce=" + String.valueOf(mNonce) + "&accountId=" + mNumericID;
+            if (mBestdeadline.compareTo(BigInteger.valueOf(mActiveBlock.targetDeadline)) < 0) {
+                GetAsync jsonCall = new GetAsync(URL) {
+                    @Override
+                    protected void onPostExecute(JSONObject json) {
+                        if (json != null) {
+                            try {
+                                Log.d(TAG, json.toString());
+                                String mRespond = json.getString("account");
+                                mCallback.notice("SUBMITNONCE", "SUCCESS");
+                            } catch (JSONException e) {
+                                mCallback.notice("SUBMITNONCE", "INVALID");
+                            }
+                        } else {
+                            mCallback.notice("SUBMITNONCE", "NULL");
+                        }
+                    }
+                };
+                jsonCall.execute();
+            }
+            else {
+                Log.d(TAG, "Did Not Submit: URL");
+            }
+
+        }
+    }
 }

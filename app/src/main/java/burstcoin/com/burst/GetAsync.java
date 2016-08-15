@@ -29,21 +29,16 @@ public class GetAsync extends AsyncTask<String, String, JSONObject> {
 
     @Override
     protected JSONObject doInBackground(String... args) {
-
         try {
-
             HashMap<String, String> params = new HashMap<>();
             JSONObject json = jsonParser.makeHttpRequest(URL, "GET", params);
-
             if (json != null) {
                 //Log.d("JSON result", json.toString());
                 return json;
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
