@@ -10,7 +10,10 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import burstcoin.com.burst.mining.IntMiningStatus;
 import burstcoin.com.burst.mining.MiningService;
@@ -34,6 +37,10 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
     private TextView mTxtCurrentBlock;
     private TextView mTxtPoolSvr;
     private TextView mTxtGBPlot;
+    private TextView mTxtDL;
+    private TextView mTxtAccepted;
+
+    private ImageView mImgMined;
 
     private String mPassPhrase = "";
     private String mRewardID = "";
@@ -51,6 +58,12 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
         mTxtGBPlot = (TextView)findViewById(R.id.txtGBPlot);
         mTxtCurrentBlock = (TextView) findViewById(R.id.txtCurrentBlock);
         mTxtPoolSvr = (TextView) findViewById(R.id.txtPoolSvr);
+        mTxtDL = (TextView) findViewById(R.id.txtCurrentDL);
+        mTxtAccepted = (TextView) findViewById(R.id.txtStaticAccepted);
+        mTxtAccepted.setVisibility(View.INVISIBLE);
+
+        mImgMined = (ImageView) findViewById(R.id.imgMined);
+        mImgMined.setVisibility(View.INVISIBLE);
 
         mBtnMiningAction = (Button) findViewById(R.id.btnMinerOp);
         mBtnSetPool = (Button) findViewById(R.id.btnSetPool);
@@ -156,6 +169,8 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                         @Override
                         public void run() {
                             mBtnMiningAction.setText("START MINING");
+                            mImgMined.setVisibility(View.INVISIBLE);
+                            mTxtAccepted.setVisibility(View.INVISIBLE);
                         }
                     });
                 }
@@ -167,6 +182,10 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                         @Override
                         public void run() {
                             mTxtCurrentBlock.setText("Current Block: " + mCurrentBlock);
+                            mImgMined.setVisibility(View.INVISIBLE);
+                            mTxtAccepted.setVisibility(View.INVISIBLE);
+                            mTxtDL.setText("N/A");
+
                             if (mFinalConfirm != 0) {
                                 Long mToGo = mFinalConfirm - Long.parseLong(mCurrentBlock);
                                 mBtnSetPool.setText( Long.toString(mToGo) + " Confirms Remaining");
@@ -186,7 +205,26 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                     validateRewardID();
                 }
                 break;
-
+            case "DEADLINE":
+                final String mDL = args[1];
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mTxtDL.setText(mDL);
+                    }
+                });
+                break;
+            case "SUBMITNONCE":
+                if(args[1].equals("SUCCESS")) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mImgMined.setVisibility(View.VISIBLE);
+                            mTxtAccepted.setVisibility(View.VISIBLE);
+                        }
+                    });
+                }
+                break;
         }
     }
 

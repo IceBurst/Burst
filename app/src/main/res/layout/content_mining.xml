@@ -90,6 +90,16 @@
         android:layout_below="@+id/txtStaticCurrentDL"
         android:layout_centerHorizontal="true" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ACCEPTED"
+        android:id="@+id/txtStaticAccepted"
+        android:layout_below="@+id/txtCurrentDL"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/colorAccentPressed"
+        android:textStyle="bold" />
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -101,5 +111,17 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
          />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imgMined"
+        android:layout_below="@+id/txtStaticAccepted"
+        android:src="@drawable/mined"
+        android:layout_alignLeft="@+id/btnMinerOp"
+        android:layout_alignStart="@+id/btnMinerOp"
+        android:layout_alignRight="@+id/btnMinerOp"
+        android:layout_alignEnd="@+id/btnMinerOp"
+        android:layout_above="@+id/btnMinerOp" />
 
 </RelativeLayout>

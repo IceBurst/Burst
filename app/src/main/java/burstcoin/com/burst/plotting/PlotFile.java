@@ -71,7 +71,7 @@ public class PlotFile {
         int staggeramt = 1;     // We are going to plot in simple 1NONCE, 256K chunks
         byte[] outputbuffer = new byte[(int) (staggeramt * SinglePlot.PLOT_SIZE)];              // <-- this is 1 nonce in a byte[]
         for (int mWorkingNonce = 0;mWorkingNonce < NonceToComplete ;mWorkingNonce++){
-            SinglePlot plot = new SinglePlot(address, mWorkingNonce);
+            SinglePlot plot = new SinglePlot(address, mStart+mWorkingNonce);
             Log.d(TAG, "Plotting Nonce #:" + mWorkingNonce + " of " + NonceToComplete);
             // Need to understand this a little better
             // why do we iterate through?  Why not just copy the whole block in?
@@ -83,12 +83,6 @@ public class PlotFile {
                 Log.d (TAG,"3: outputbuffer has a size of: " + outputbuffer.length);
                 Log.d (TAG,"4: Starting to copy at " + Integer.toString((int) ((i * SinglePlot.SCOOP_SIZE * staggeramt) + (1 * SinglePlot.SCOOP_SIZE))) + " of the output buffer");
                 Log.d (TAG,"5: Trying to Copy "+ SinglePlot.SCOOP_SIZE + " bytes");
-                System.arraycopy(plot.data,                         // Source Array - should be one Nonce, let put some debugging in this Mo
-                        i * SinglePlot.SCOOP_SIZE,                  // Starting position in the source array
-                        outputbuffer,                               // destination array
-                        (int) ((i * SinglePlot.SCOOP_SIZE * staggeramt) + (1 * SinglePlot.SCOOP_SIZE)), // Starting Position in the Destination Array
-                        SinglePlot.SCOOP_SIZE);                     // length of bytes to copy
-                //java.lang.ArrayIndexOutOfBoundsException: src.length=262144 srcPos=262080 dst.length=262144 dstPos=262144 length=64
             }*/
 
             try {

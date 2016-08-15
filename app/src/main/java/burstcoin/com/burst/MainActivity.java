@@ -367,7 +367,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // This is how Data is passed back to main via the IntProvider Class
     @Override
     public void notice(String... args){
-        // ToDo: This is where we handle things
         /*
          * args[0] is probably the identified
          * args[1] is probably a status message, SUCCESS or something else, typically an error code
@@ -389,12 +388,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     mPassPhrase = args[1];
                 break;
         }
-
         String debug = "";
         for (String s : args)
             debug = debug + " " + s;
         Log.d(TAG, debug);
-        // This is were we get info back from BurstUtils
+
         //Toast.makeText(getApplicationContext(),"We got a notice back from BurtUtils: "+BurstUtil.getNumericIDFromLocal(burstID, this),Toast.LENGTH_LONG).show();
     }
 
