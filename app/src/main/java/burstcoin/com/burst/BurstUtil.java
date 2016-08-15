@@ -29,6 +29,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import static java.lang.Character.digit;
 
 /**
  * Created by IceBurst on 7/6/2016.
@@ -50,13 +51,13 @@ public class BurstUtil {
 
     public BurstUtil() {}
 
-    // Createa  Human readable Deadline from a provided BigInteger
+    // Create a Human readable Deadline from a provided BigInteger
     public static String BigIntToHumanReadableDate(BigInteger mBI) {
         String mDate = "";
         long mDL = mBI.longValue();
 
         final long SecInMin = 60;
-        final long SecInHr = 2600;
+        final long SecInHr = 3600;
         final long SecInDay = 86400;
         final long SecInMon = 2592000;      // Defined as 30 Days
         final long SecInYear = 31536000;    // defined as 365 days
@@ -90,7 +91,17 @@ public class BurstUtil {
         return mDate;
     }
 
-    // ToDo: Requires Testing
+    // Generate a Hex Equivilant from a String
+    public static byte[] stringToBytes(String input) {
+        int length = input.length();
+        byte[] output = new byte[length / 2];
+
+        for (int i = 0; i < length; i += 2) {
+            output[i / 2] = (byte) ((digit(input.charAt(i), 16) << 4) | digit(input.charAt(i+1), 16));
+        }
+        return output;
+    }
+
     // Could be very useful for setting up plot sizes
     // Query and return the amount of freespace on the SD card in nounces
     public static long getFreeSpaceInNounces() {
@@ -161,14 +172,12 @@ public class BurstUtil {
                 return 0;
             // ToDo: Need to setup StatFS better
             /* Test Results
-             * Running 5.1 Nexus5X Emulated with 8GB SD, worked correctly
+             * Running 5.1 Nexus5X Emulated with 8GB SD, returned /storage/sdcard which was correct
              */
             StatFs stat = new StatFs(mCards[0]);
-            // Result Sets : Emulator @ Home Nexus 5X w/ 8GB card returned /storage/sdcard which was correct
             long megsAvailable = stat.getTotalBytes() / 1048576;
             DecimalFormat roundingFormat = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.US));
             roundingFormat.setRoundingMode(RoundingMode.DOWN);
-            //  getExternalFilesDir(null)
             return Double.parseDouble(roundingFormat.format(((double)megsAvailable / (double)1024)));
         }
         else
