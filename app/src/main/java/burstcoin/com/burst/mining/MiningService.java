@@ -1,6 +1,5 @@
 package burstcoin.com.burst.mining;
 
-import android.app.ActivityManager;
 import android.util.Log;
 import burstcoin.com.burst.BurstUtil;
 import burstcoin.com.burst.GetAsync;
@@ -18,7 +17,6 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -47,19 +45,14 @@ public class MiningService implements IntMinerDeadLine{
     static String poolGetBlockInfo = "/burst?requestType=getMiningInfo";
 
     // This is where we stack up our mining Threads
-    //private ArrayList<PlotFileMiner> minerThreads = new ArrayList<PlotFileMiner>();
     private final BlockingQueue<Runnable> minerThreads = new LinkedBlockingQueue<Runnable>();
-
+    private static int NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors();
+    private static ThreadPoolExecutor mThreadPool;
 
     private PlotFiles mPlotFiles;
     private String mNumericID;
-    long lastShareSubmitTime;
     BigInteger mBestdeadline = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
-    Random rand;
     private IntMiningStatus mCallback;
-
-    private static int NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors();
-    private static ThreadPoolExecutor mThreadPool;
 
     // Constructor for the Mining Service
     public MiningService (IntMiningStatus cb, PlotFiles pf, String numeric) {
@@ -79,9 +72,7 @@ public class MiningService implements IntMinerDeadLine{
         mPoller.schedule( new TimerTask() {
             public void run() {
                 // This is where we poll the webserver for block data
-                //Log.d(TAG, "Trying:"+poolUrl+poolGetBlockInfo);
                 String mBlockData = GET(poolUrl+poolGetBlockInfo);
-                //Log.d(TAG, mBlockData);
                 try {
                     JSONObject mJSONBlockData = new JSONObject(mBlockData);
                     if (mActiveBlock.height != mJSONBlockData.getLong("height")) {
@@ -89,14 +80,13 @@ public class MiningService implements IntMinerDeadLine{
                         mActiveBlock.genSig = mJSONBlockData.getString("generationSignature");
                         mActiveBlock.baseTarget = Long.parseLong(mJSONBlockData.getString("baseTarget"));
                         mActiveBlock.targetDeadline = mJSONBlockData.getLong("targetDeadline");
-                        //mActiveBlock.reqProcessingTime = mJSONBlockData.getBoolean("requestProcessingTime"); <-- This was throwing org.json.JSONException: Value 0 at requestProcessingTime of type java.lang.Integer cannot be converted to boolean
                         mActiveBlock.reqProcessingTime = mJSONBlockData.getInt("requestProcessingTime");
                         mCallback.notice("BLOCK","HEIGHT",Long.toString(mActiveBlock.height));
-                        // Holy crap we got a new block lets mine this puppy if we can.....
+                        // We got a new block lets mine this puppy if we can.....
                         stopAndRestartMining();
 
                     }
-                    // Else it's a repeat block dont do anything.
+                    // Else it's a repeat block don't do anything.
                 } catch (org.json.JSONException e) {
                     Log.d(TAG,"JSON Object Exploded on GetBlockData");  // Just try again in another 2 seconds
                     Log.e(TAG, "exception", e);
@@ -112,7 +102,7 @@ public class MiningService implements IntMinerDeadLine{
         mCallback.notice("MINING","STOPPED");
     }
 
-    // This is Where miners give back their best Deadlines per GB
+    // This is Where Threaded Miners give back their best Deadlines per GB
     @Override
     public synchronized void foundDeadLine(long nonce, BigInteger deadline) {
         String mStringBestDL = BurstUtil.BigIntToHumanReadableDate(deadline);
@@ -122,7 +112,7 @@ public class MiningService implements IntMinerDeadLine{
             // Send the New Best Deadline to the GUI
             mCallback.notice("DEADLINE", mStringBestDL);
             if(mBestdeadline.compareTo(BigInteger.valueOf(mActiveBlock.targetDeadline)) < 0) {
-                SubmitShare(nonce); // submit Nonce to Pool
+                SubmitShare(nonce); // Pass the deadline up for submission checks
             }
         }
     }
@@ -156,30 +146,9 @@ public class MiningService implements IntMinerDeadLine{
         }
     }
 
-    public synchronized long nextNonce(){
-        return (long)(rand.nextDouble()*Long.MAX_VALUE);
-    }
-
     public void stopAndRestartMining(){
 
-        // This is to stop existing miners
-        if (mThreadPool.getActiveCount() > 0) {
-            // ThreadPoolExecutor
-            mThreadPool.shutdownNow();
-        }
-        /*  *******This Seg Faulted the Application*****
-        ToDo: Critical Error to Fix
-        E/AndroidRuntime: FATAL EXCEPTION: Timer-0
-          Process: burstcoin.com.burst, PID: 12351
-          java.util.concurrent.RejectedExecutionException: Task burstcoin.com.burst.mining.MiningService$PlotFileMiner@39070e30 rejected from java.util.concurrent.ThreadPoolExecutor@1773daa9[Shutting down, pool size = 1, active threads = 1, queued tasks = 1, completed tasks = 9]
-              at java.util.concurrent.ThreadPoolExecutor$AbortPolicy.rejectedExecution(ThreadPoolExecutor.java:2011)
-              at java.util.concurrent.ThreadPoolExecutor.reject(ThreadPoolExecutor.java:793)
-              at java.util.concurrent.ThreadPoolExecutor.execute(ThreadPoolExecutor.java:1339)
-              at burstcoin.com.burst.mining.MiningService.stopAndRestartMining(MiningService.java:177)
-              at burstcoin.com.burst.mining.MiningService$1.run(MiningService.java:96)
-              at java.util.Timer$TimerImpl.run(Timer.java:284)
-         */
-
+        // Dump all the mining requests in Queue for the last block
         minerThreads.clear();
 
         mBestdeadline = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
@@ -271,7 +240,7 @@ public class MiningService implements IntMinerDeadLine{
                     }
 
                     int compare = mDeadLine.compareTo(BigInteger.valueOf(mActiveBlock.targetDeadline));
-                    if(compare <= 0) {  // This is if it's good enough for the Pool Deadline
+                    if(compare <= 0) {                                                                 // This is if it's good enough for the Pool Deadline
                         mSendDeadLine.foundDeadLine(mWorkingNonce,mDeadLine);                          // Send this Deadline back to the Mining Service for a 2nd Evaluation and Submitting
                         //Log.d(TAG, "Found a better submission @ " + mWorkingNonce + " with a DL of:" + deadline);
                     }
@@ -282,7 +251,6 @@ public class MiningService implements IntMinerDeadLine{
 
             } catch (FileNotFoundException e) {
                 Log.e(TAG, "Cannot open file: " + mPlotFileLocation);
-                //e.printStackTrace();
             } catch (IOException e) {
                 Log.e(TAG, "Error reading file: " + mPlotFileLocation);
             }
