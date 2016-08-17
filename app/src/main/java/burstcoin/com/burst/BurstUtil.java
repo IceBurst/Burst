@@ -110,8 +110,35 @@ public class BurstUtil {
         return bytesAvailable / (long)262144;
     }
 
-    // ToDo: Test on 2nd live device I get .37 on my emulated device
+
+    public static double getFreeSpaceInGB() {
+        String state = Environment.getExternalStorageState();
+        String path = getBestPath();
+        if (path.equals(""))         // added 12-July-2016, incase there is no valid cards
+            return 0;
+
+        if (Environment.MEDIA_MOUNTED.equals(state))
+        {
+            // We can read and write the media
+            StatFs stat = new StatFs(path);
+            long bytesAvailable = stat.getAvailableBytes();
+            long megsAvailable = bytesAvailable / 1048576;
+            DecimalFormat roundingFormat = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.US));
+            roundingFormat.setRoundingMode(RoundingMode.DOWN);
+            return Double.parseDouble(roundingFormat.format(((double)megsAvailable / (double)1024)));
+        }
+        else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state))
+        {
+            // We can only read the media so treat as none free
+            return 0;
+        }
+        else  // No external media
+        {
+            return 0;
+        }
+    }
     // Return Free space in GB to show on Plotting Screen
+    /*  This is the version I was using that worked kinda...
     public static double getFreeSpaceInGB() {
         String state = Environment.getExternalStorageState();
         String[] mCards = getStorageDirectories();
@@ -139,29 +166,33 @@ public class BurstUtil {
             return 0;
         }
     }
+    */
 
     public static String getPathToSD() {
+        /*
         String mPath = "";
         String[] mCards = getStorageDirectories();
         if (mCards.length > 0) {
             mPath = mCards[0];
         }
         return mPath;
+        */
+        return getBestPath();
     }
 
-    // ToDo: Testing 8-July on Hardware, return .51 <-- Is This correct for a simulated SD, thought it should be 2GB?
     // We are looking internal memory that is registering as External, need to fix this some how, we only want real SD cards
     // We Get these results with no card as well!!
     public static double getTotalSpaceInGB() {
         String state = Environment.getExternalStorageState();
         String[] mCards = getStorageDirectories();
+        String bestPath = getBestPath();
         //File mStoragePath = Environment.getExternalStorageDirectory();
         // isExternalStorageRemovable comes back false, thats how we know this is the wrong memory space.
         if (Environment.MEDIA_MOUNTED.equals(state) ||
                 Environment.MEDIA_MOUNTED_READ_ONLY.equals(state) )
         {
             // We can read or write the media
-            // This below is Bad, we need to write something more elegant
+            //ToDo:  This below is Bad, we need to write something more elegant
             for (String path : mCards) {
                 Log.d(TAG, "Found Storage at:" + path);           // This is just a diagnostic to check for SD Card paths
             }
@@ -170,11 +201,14 @@ public class BurstUtil {
 
             if (mCards.length == 0)         // added 12-July-2016, in case there is no valid cards
                 return 0;
+
+
             // ToDo: Need to setup StatFS better
             /* Test Results
              * Running 5.1 Nexus5X Emulated with 8GB SD, returned /storage/sdcard which was correct
              */
-            StatFs stat = new StatFs(mCards[0]);
+            //StatFs stat = new StatFs(mCards[0]);
+            StatFs stat = new StatFs(bestPath);
             long megsAvailable = stat.getTotalBytes() / 1048576;
             DecimalFormat roundingFormat = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.US));
             roundingFormat.setRoundingMode(RoundingMode.DOWN);
@@ -403,4 +437,20 @@ public class BurstUtil {
         return rv.toArray(new String[rv.size()]);
     }
 
+    public static String getBestPath() {
+        String path ="";
+        long mBytes = 0;
+        String state = Environment.getExternalStorageState();
+        String[] mCards = getStorageDirectories();
+        if (mCards.length == 0)         // added 12-July-2016, incase there is no valid cards
+            return "";
+
+        for(String p : mCards) {
+            StatFs stat = new StatFs(p);
+            if(stat.getTotalBytes() > mBytes) {
+                path = p;
+            }
+        }
+        return path;
+    }
 }
