@@ -45,6 +45,15 @@ public class PlotFile {
 
     public void setNumericID(String numericID) {
         mNumericID = numericID;
+        /*
+        08-17 02:49:04.981: E/AndroidRuntime(6358): java.lang.NumberFormatException: Invalid long: "17598030775603019651"
+        08-17 03:17:22.134: D/PlotFile(8680): Character Check:49,55,53,57,56,48,51,48,55,55,53,54,48,51,48,49,57,54,53,49,
+        StringBuilder sb = new StringBuilder();
+        for (char c : numericID.toCharArray()) {
+            sb.append((int) c).append(",");
+        }
+        Log.d(TAG,"Character Check:" + sb);
+        */
         address = Long.valueOf(numericID);
     }
 
@@ -59,7 +68,7 @@ public class PlotFile {
         FileOutputStream out;
 
         mCallback.notice("PLOTTING", "NONCE", "0");
-        mFileName = mNumericID + '_' + Long.toString(mStart) + '_' + Long.toString(new Long(NonceToComplete)+mStart) + '_' + Long.toString(mStgr);
+        mFileName = mNumericID + '_' + Long.toString(mStart) + '_' + Long.toString(new Long(NonceToComplete)) + '_' + Long.toString(mStgr);
         String mPlotFile = BurstUtil.getPathToSD() + '/' + mFileName;
         try {
             Log.d(TAG, "Writing to:" + mPlotFile);
@@ -73,8 +82,6 @@ public class PlotFile {
         for (int mWorkingNonce = 0;mWorkingNonce < NonceToComplete ;mWorkingNonce++){
             SinglePlot plot = new SinglePlot(address, mStart+mWorkingNonce);
             Log.d(TAG, "Plotting Nonce #:" + mWorkingNonce + " of " + NonceToComplete);
-            // Need to understand this a little better
-            // why do we iterate through?  Why not just copy the whole block in?
             /*
             for(int i = 0; i < SinglePlot.SCOOPS_PER_PLOT; i++) { // through 4096 crashing on the last entry
                 Log.d (TAG,"0: This is iteration #:" + i);
@@ -86,7 +93,6 @@ public class PlotFile {
             }*/
 
             try {
-
                 out.write(plot.data);
                 out.flush();
             } catch (IOException ioex) {
