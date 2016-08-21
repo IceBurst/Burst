@@ -1,5 +1,7 @@
 package burstcoin.com.burst.plotting;
 
+import android.content.Context;
+import android.os.PowerManager;
 import android.util.Log;
 
 import java.io.DataInputStream;
@@ -8,6 +10,8 @@ import java.io.IOException;
 
 import burstcoin.com.burst.BurstUtil;
 import burstcoin.com.burst.IntProvider;
+import burstcoin.com.burst.tools.BurstContext;
+import burstcoin.com.burst.tools.PowerTool;
 
 /**
  * Created by IceBurst on 7/11/2016.
@@ -58,11 +62,27 @@ public class Plotter {
 
     public void plotGBs(int mGBs) {
         int mStartingGB = mPlotFiles.size();
+        boolean mOnPower = PowerTool.isOnPower();
+        boolean mCPULockedOn = false;
+        PowerManager powerManager = (PowerManager) BurstContext.getAppContext().getSystemService(Context.POWER_SERVICE);
+        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"MyWakelockTag");
+
+        if (mOnPower) {
+            wakeLock.acquire();
+            mCPULockedOn = true;
+        }
         for (int i = 0; i<mGBs; i++) {
             PlotFile mNewPlot = new PlotFile(callback);
             mNewPlot.setNumericID(mNumericID);
             mNewPlot.setStartNonce((mStartingGB+i) * PlotFile.NonceToComplete);
             mNewPlot.plot();
+            if (PowerTool.isOnPower() == false) {       // after each GB check to see if were plugged in
+                wakeLock.release();
+                mCPULockedOn = false;
+            }
+        }
+        if (mCPULockedOn) {
+            wakeLock.release();
         }
     }
 }

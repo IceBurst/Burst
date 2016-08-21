@@ -219,22 +219,6 @@ public class PlotterActivity extends AppCompatActivity implements IntPlotStatus 
 
     }
 
-    // This should probably be in the Mining section so we can check/Set reward assignment
-    // We can also later show the user which pool they are tied to if we know about it
-    private void loadMiningPools( ){
-        // Later this should get data from an External Source
-        mMiningPools = null;
-        mMiningPools = new TreeMap<String, String>();
-        mMiningPools.put("pool.burst-team.us","BURST-32TT-TSAC-HTKW-CC26C");
-        // Add more pools just like above
-
-        /*
-        Pool.Burstcoin.de / pool.Burstcoin.uk
-        Recipient: BURST-GHTV-7ZP3-DY4B-FPBFA
-        URL: http://pool.burstcoin.de (Port 8080 )
-        */
-    }
-
     @Override
     public void notice(String... args){
         // This is how we get data back from the Plotter Tool

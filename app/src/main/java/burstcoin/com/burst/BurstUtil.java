@@ -279,7 +279,8 @@ public class BurstUtil {
 
     public void getRewardIDFromNumericID(final String numericID, final Context context) {
 
-        String URL = "http://mobile.burst-team.us:8125/burst?requestType=getRewardRecipient&account=" + numericID;
+        //String URL = "http://mobile.burst-team.us:8125/burst?requestType=getRewardRecipient&account=" + numericID;
+        String URL = "https://mwallet.burst-team.us:8125/burst?requestType=getRewardRecipient&account=" + numericID;
         Log.d(TAG, "GetRewardID:"+URL);
         GetAsync jsonCall = new GetAsync(URL) {
             @Override
@@ -452,5 +453,10 @@ public class BurstUtil {
             }
         }
         return path;
+    }
+
+    public static String convertStreamToString(java.io.InputStream is) {
+        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
     }
 }

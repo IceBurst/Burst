@@ -1,6 +1,7 @@
 package burstcoin.com.burst;
 
 import android.graphics.Color;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.annotation.IntegerRes;
 import android.support.design.widget.FloatingActionButton;
@@ -16,10 +17,12 @@ import android.widget.TextView;
 import org.w3c.dom.Text;
 
 import burstcoin.com.burst.mining.IntMiningStatus;
+import burstcoin.com.burst.mining.MiningPools;
 import burstcoin.com.burst.mining.MiningService;
 import burstcoin.com.burst.plotting.IntPlotStatus;
 import burstcoin.com.burst.plotting.PlotFiles;
 import burstcoin.com.burst.plotting.Plotter;
+import burstcoin.com.burst.tools.BurstContext;
 
 public class MiningActivity extends AppCompatActivity implements IntMiningStatus, IntProvider{
 
@@ -28,6 +31,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
     final static String sPoolNumericID = "18401070918313114651";
 
     private MiningService mMiningService;
+    private MiningPools mMiningPools;
     private Plotter mPlotter;
     private PlotFiles mPlotFiles;
     private String mNumericID;
@@ -46,6 +50,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
     private String mRewardID = "";
     private boolean mRewardSet = false;
     private long mFinalConfirm;
+    private boolean mPlayedSound = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +76,10 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
         mPlotter = new Plotter(mNumericID);
         mPlotFiles = new PlotFiles(BurstUtil.getPathToSD(), mNumericID);
         mMiningService = new MiningService(this, mPlotFiles, mNumericID);
+
+        // ToDo: v2.1 allow pool changer
+        //mMiningPools = new MiningPools();
+        //mMiningPools.loadMiningPools();
 
         int mPlotCt = mPlotter.getPlotSize();
         if (mPlotCt > 0) {
@@ -184,6 +193,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                             mTxtCurrentBlock.setText("Current Block: " + mCurrentBlock);
                             mImgMined.setVisibility(View.INVISIBLE);
                             mTxtAccepted.setVisibility(View.INVISIBLE);
+                            mPlayedSound = false;
                             mTxtDL.setText("N/A");
 
                             if (mFinalConfirm != 0) {
@@ -221,6 +231,11 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                         public void run() {
                             mImgMined.setVisibility(View.VISIBLE);
                             mTxtAccepted.setVisibility(View.VISIBLE);
+                            if(mPlayedSound == false ){
+                                MediaPlayer mp = MediaPlayer.create(BurstContext.getAppContext(),  R.raw.chaching);
+                                mp.start();
+                            }
+                            mPlayedSound = true;
                         }
                     });
                 }

@@ -8,8 +8,8 @@ model{
             applicationId = "burstcoin.com.burst"
             minSdkVersion.apiLevel  16
             targetSdkVersion.apiLevel 23
-            versionName '1.0.5'
-            versionCode 5
+            versionName '2.0.0'
+            versionCode 200
             multiDexEnabled true
         }
         buildTypes {

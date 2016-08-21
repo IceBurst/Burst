@@ -84,7 +84,6 @@ public class MiningService implements IntMinerDeadLine{
                         mCallback.notice("BLOCK","HEIGHT",Long.toString(mActiveBlock.height));
                         // We got a new block lets mine this puppy if we can.....
                         stopAndRestartMining();
-
                     }
                     // Else it's a repeat block don't do anything.
                 } catch (org.json.JSONException e) {

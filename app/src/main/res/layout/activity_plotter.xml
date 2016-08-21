@@ -8,7 +8,7 @@
     android:background="@color/background_floating_material_dark">
 
     <TextView
-        android:layout_width="387dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="@android:style/TextAppearance.Large"
         android:text="Plots"
@@ -16,7 +16,7 @@
         android:layout_weight="0.03"
         android:layout_gravity="top"
         android:layout_marginTop="5dp"
-        android:textAlignment="center"
+        android:layout_centerHorizontal="true"
         android:theme="@style/AppTheme.AppBarOverlay" />
 
     <TextView
@@ -85,7 +85,8 @@
         android:layout_alignLeft="@+id/barDriveUseage"
         android:layout_alignStart="@+id/barDriveUseage"
         android:layout_alignRight="@+id/barDriveUseage"
-        android:layout_alignEnd="@+id/barDriveUseage" />
+        android:layout_alignEnd="@+id/barDriveUseage"
+        android:focusable="true" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -111,12 +112,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Plot"
+        android:nextFocusDown="@id/setPlotSize"
         android:minWidth="150dip"
         android:id="@+id/btnPlot"
         android:theme="@style/AppTheme.AppBarOverlay"
         android:background="@color/colorAccent"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"  />
+        android:layout_centerHorizontal="true"
+        android:focusable="true" />
 
     <Button
         android:layout_width="wrap_content"
@@ -131,7 +134,8 @@
         android:background="@color/colorAccent"
         android:layout_below="@+id/txtPlotsFound"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="48dp" />
+        android:layout_marginTop="48dp"
+        android:focusable="true" />
 
     <Button
         android:layout_width="wrap_content"
@@ -148,7 +152,8 @@
         android:layout_alignRight="@+id/btnDeletePlot"
         android:layout_alignEnd="@+id/btnDeletePlot"
         android:layout_alignLeft="@+id/btnDeletePlot"
-        android:layout_alignStart="@+id/btnDeletePlot" />
+        android:layout_alignStart="@+id/btnDeletePlot"
+        android:focusable="true" />
 
 
 </RelativeLayout>
