@@ -131,7 +131,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
 
                 }
                 // Send the Request
-                BurstUtil.setRewardAssignment("18401070918313114651", mPassPhrase); // <-- Tie our passphrase to the Mining pool payout
+                BurstUtil.setRewardAssignment(sPoolNumericID, mPassPhrase); // <-- Tie our passphrase to the Mining pool payout
             }
         });
 
@@ -201,7 +201,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                                 mBtnSetPool.setText( Long.toString(mToGo) + " Confirms Remaining");
                                 if (mToGo == 0) {
                                     mFinalConfirm = 0;
-                                    mRewardID = "18401070918313114651"; // More Hackyneess
+                                    mRewardID = sPoolNumericID; // More Hackyneess
                                     validateRewardID();
                                 }
                             } //mMiningService.mActiveBlock.height + 4;
@@ -249,7 +249,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
     }
 
     private void validateRewardID() {
-        if(mRewardID.equals("18401070918313114651")) {   // <-- MPool
+        if(mRewardID.equals(sPoolNumericID)) {   // <-- MPool
             mRewardSet = true;
             mBtnSetPool.setEnabled(false);
             mBtnSetPool.setVisibility(View.INVISIBLE);
