@@ -62,7 +62,7 @@ public class PlotFile {
         return this.mFileName;
     }
 
-    public void plot() {
+    public void plot() throws IOException {
         // This needs to be Threaded out so we can cancel it....
         Long mNonce = mStart;
         FileOutputStream out;
@@ -75,7 +75,7 @@ public class PlotFile {
             out = new FileOutputStream(mPlotFile);
         } catch (IOException ioex) {
             mCallback.notice("TOAST", "ERROR GETTING OUTPUTSTREAM");
-            return;
+            throw ioex;
         }
         int staggeramt = 1;     // We are going to plot in simple 1NONCE, 256K chunks
         try {
