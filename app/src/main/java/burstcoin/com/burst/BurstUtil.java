@@ -12,14 +12,18 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Collections;
@@ -458,5 +462,24 @@ public class BurstUtil {
     public static String convertStreamToString(java.io.InputStream is) {
         java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
         return s.hasNext() ? s.next() : "";
+    }
+
+    public static String GET(String url){
+        String result = "";
+        try {
+            // create HttpClient
+            URL uri = new URL(url);
+            HttpURLConnection urlConnection = (HttpURLConnection) uri.openConnection();
+            try {
+                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                result = convertStreamToString(in);  // This returns the object name @ reference
+                // This result is a JSON that we can use our module on
+            } finally {
+                urlConnection.disconnect();
+            }
+        } catch (Exception e) {
+            Log.d(TAG, e.getLocalizedMessage());
+        }
+        return result;
     }
 }

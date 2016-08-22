@@ -74,14 +74,15 @@ public class PlotFile {
             Log.d(TAG, "Writing to:" + mPlotFile);
             out = new FileOutputStream(mPlotFile);
         } catch (IOException ioex) {
-
+            mCallback.notice("TOAST", "ERROR GETTING OUTPUTSTREAM");
             return;
         }
         int staggeramt = 1;     // We are going to plot in simple 1NONCE, 256K chunks
-        byte[] outputbuffer = new byte[(int) (staggeramt * SinglePlot.PLOT_SIZE)];              // <-- this is 1 nonce in a byte[]
-        for (int mWorkingNonce = 0;mWorkingNonce < NonceToComplete ;mWorkingNonce++){
-            SinglePlot plot = new SinglePlot(address, mStart+mWorkingNonce);
-            Log.d(TAG, "Plotting Nonce #:" + mWorkingNonce + " of " + NonceToComplete);
+        try {
+            byte[] outputbuffer = new byte[(int) (staggeramt * SinglePlot.PLOT_SIZE)];              // <-- this is 1 nonce in a byte[]
+            for (int mWorkingNonce = 0; mWorkingNonce < NonceToComplete; mWorkingNonce++) {
+                SinglePlot plot = new SinglePlot(address, mStart + mWorkingNonce);
+                Log.d(TAG, "Plotting Nonce #:" + mWorkingNonce + " of " + NonceToComplete);
             /*
             for(int i = 0; i < SinglePlot.SCOOPS_PER_PLOT; i++) { // through 4096 crashing on the last entry
                 Log.d (TAG,"0: This is iteration #:" + i);
@@ -92,14 +93,18 @@ public class PlotFile {
                 Log.d (TAG,"5: Trying to Copy "+ SinglePlot.SCOOP_SIZE + " bytes");
             }*/
 
-            try {
-                out.write(plot.data);
-                out.flush();
-            } catch (IOException ioex) {
-                Log.e(TAG,"IOException writing to"+mPlotFile);
-                return;
+                try {
+                    out.write(plot.data);
+                    out.flush();
+                } catch (IOException ioex) {
+                    Log.e(TAG, "IOException writing to" + mPlotFile);
+                    mCallback.notice("TOAST", "FAILED TO WRITE TO STORAGE");
+                    return;
+                }
+                mCallback.notice("PLOTTING", "NONCE", Integer.toString(mWorkingNonce));
             }
-            mCallback.notice("PLOTTING", "NONCE", Integer.toString(mWorkingNonce));
+        } catch (Exception e) {
+            mCallback.notice("TOAST", "FAILED TO GENERATE PLOT");
         }
 
         try{

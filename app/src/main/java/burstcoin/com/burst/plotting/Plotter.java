@@ -62,27 +62,33 @@ public class Plotter {
 
     public void plotGBs(int mGBs) {
         int mStartingGB = mPlotFiles.size();
-        boolean mOnPower = PowerTool.isOnPower();
-        boolean mCPULockedOn = false;
-        PowerManager powerManager = (PowerManager) BurstContext.getAppContext().getSystemService(Context.POWER_SERVICE);
-        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"MyWakelockTag");
 
-        if (mOnPower) {
-            wakeLock.acquire();
-            mCPULockedOn = true;
-        }
-        for (int i = 0; i<mGBs; i++) {
-            PlotFile mNewPlot = new PlotFile(callback);
-            mNewPlot.setNumericID(mNumericID);
-            mNewPlot.setStartNonce((mStartingGB+i) * PlotFile.NonceToComplete);
-            mNewPlot.plot();
-            if (PowerTool.isOnPower() == false) {       // after each GB check to see if were plugged in
-                wakeLock.release();
-                mCPULockedOn = false;
+        try {
+            boolean mOnPower = PowerTool.isOnPower();
+            boolean mCPULockedOn = false;
+            PowerManager powerManager = (PowerManager) BurstContext.getAppContext().getSystemService(Context.POWER_SERVICE);
+            PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"MyWakelockTag");
+
+            if (mOnPower) {
+                wakeLock.acquire();
+                mCPULockedOn = true;
             }
-        }
-        if (mCPULockedOn) {
-            wakeLock.release();
+
+            for (int i = 0; i<mGBs; i++) {
+                PlotFile mNewPlot = new PlotFile(callback);
+                mNewPlot.setNumericID(mNumericID);
+                mNewPlot.setStartNonce((mStartingGB+i) * PlotFile.NonceToComplete);
+                mNewPlot.plot();
+                if (PowerTool.isOnPower() == false) {       // after each GB check to see if were plugged in
+                    wakeLock.release();
+                    mCPULockedOn = false;
+                }
+            }
+            if (mCPULockedOn) {
+                wakeLock.release();
+            }
+        } catch (Exception e) {
+            callback.notice("TOAST", "ERROR IN POWERMANAGER");
         }
     }
 }

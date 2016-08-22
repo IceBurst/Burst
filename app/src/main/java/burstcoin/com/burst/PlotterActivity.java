@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -20,6 +21,7 @@ import java.util.TreeMap;
 import burstcoin.com.burst.plotting.IntPlotStatus;
 import burstcoin.com.burst.plotting.PlotFile;
 import burstcoin.com.burst.plotting.Plotter;
+import burstcoin.com.burst.tools.BurstContext;
 
 public class PlotterActivity extends AppCompatActivity implements IntPlotStatus {
 
@@ -161,7 +163,8 @@ public class PlotterActivity extends AppCompatActivity implements IntPlotStatus 
         String mFreeMem = Long.toString(new BurstUtil().getFreeMemoryInMB(this));
         String mTotalMem = Long.toString(new BurstUtil().getTotalMemoryInMB(this));
         mTxtTest.setText("Free Memory "+mFreeMem+"MB of "+mTotalMem+"MB");
-        updateCurrentPlotInfo();
+
+       //updateCurrentPlotInfo();
 
         // This might be best in the Mining Activity
         //loadMiningPools();
@@ -215,9 +218,11 @@ public class PlotterActivity extends AppCompatActivity implements IntPlotStatus 
         }
     }
 
+    /*
     private void updateCurrentPlotInfo() {
 
     }
+    */
 
     @Override
     public void notice(String... args){
@@ -252,7 +257,15 @@ public class PlotterActivity extends AppCompatActivity implements IntPlotStatus 
                     }
                 }
                 break;
+            case "TOAST":
+                final String sError = args[1];
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast toast = Toast.makeText(BurstContext.getAppContext(), sError, Toast.LENGTH_LONG);
+                        toast.show();
+                    }
+                });
         }
     }
-
 }

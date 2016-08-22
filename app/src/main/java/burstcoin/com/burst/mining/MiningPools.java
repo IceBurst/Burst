@@ -2,6 +2,7 @@ package burstcoin.com.burst.mining;
 
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -27,11 +28,12 @@ public class MiningPools {
     ArrayList<MiningPool> mMiningPools;
     static final String TAG = "MiningPools";
 
-    public void loadMiningPools() {
-
-        // Later this should get data from an External Source
-        mMiningPools = null;
+    public MiningPools() {
         mMiningPools = new ArrayList<MiningPool>();
+    }
+
+    public void loadMiningPools() {
+        mMiningPools = null;
         getPoolList();
 
         //mMiningPools.put("pool.burst-team.us", "BURST-32TT-TSAC-HTKW-CC26C");
@@ -47,24 +49,31 @@ public class MiningPools {
     private void getPoolList() {
         String URL = "http://util.burst-team.us:8888/network/json";
         Log.d(TAG, "Servers on Network:"+URL);
+
         GetAsync jsonCall = new GetAsync(URL) {
             @Override
             protected void onPostExecute (JSONObject json) {
-                if (json != null) {
-                    try {
-                        if(json.getString("type").equals("Pool")) {  // <- This threw an error on Value, maybe because it's multiples?
-                            String mURL = json.getString("url");
-                            String mDeadLine = json.getString("targetDeadline");
-                            MiningPool mp = new MiningPool(mURL, mDeadLine);
-                            // Store the Values in a List that we can loop through to collect full data
-                            //mMiningPools.addPool(mURL, mDeadLine);
-                            mMiningPools.add(mp);
-                        }
-                    } catch (JSONException e) {
-                        Log.d(TAG,"Exploded in getPoolList reading JSON");
-                    }
-                } else {
+                // we are getting null back because it is an array of JSON and it can't handle it
 
+                if (this.jsonArray != null) {
+                    try {
+                        for (int i=0;i< this.jsonArray.length(); i++) {     // 19 entries
+                            json = this.jsonArray.getJSONObject(i);
+                            if (json.getString("type").equals("Pool")) {
+                                String mURL = json.getString("url");
+                                String mDeadLine = json.getString("targetDeadline");
+                                //MiningPool mp = new MiningPool(mURL, mDeadLine);
+                                // Store the Values in a List that we can loop through to collect full data
+                                MiningPool MP = new MiningPool(mURL, mDeadLine);
+                                //mMiningPools.addPool(mURL, mDeadLine);
+                                Log.d(TAG,"Should Call addPool("+mURL + "," + mDeadLine+")");
+                                //mMiningPools.add(mp);
+                            }
+                        }
+
+                    } catch (Exception e) {
+                        Log.d(TAG,"getPoolList JSON exploded");
+                    }
                 }
             }
         };
@@ -101,7 +110,7 @@ public class MiningPools {
       eg) burstcoinpool.devip.xyz:8080/burst?requestType=getMiningInfo
      */
     /* http://util.burst-team.us:8888/pool/json
-       Return Result Set, All Prettied Up
+       Return Result Set, All Prettied Up, Notice there is no tie to URL, boooo!
     [
     {"accountId":"12468105956737329840","accountRS":"BURST-7CPJ-BW8N-U4XF-CWW3U","name":"BURST.ninja assignment wallet","description":"This is the assignment wallet for BURST.ninja pool.","balance":"474595","assignedMiners":675,"successfulMiners":97,"foundBlocks":1097,"earnedAmount":"3212877"},
     {"accountId":"11894018496043975481","accountRS":"BURST-32TT-TSAC-HTKW-CC26C","name":"Burst-Team Pool","description":null,"balance":"46912","assignedMiners":735,"successfulMiners":124,"foundBlocks":1059,"earnedAmount":"3099611"},
@@ -131,26 +140,11 @@ public class MiningPools {
         private String mDeadline;
         private String mURL;
 
-        /*  Data About a Given Pool
-        "accountId":"12468105956737329840",
-        "accountRS":"BURST-7CPJ-BW8N-U4XF-CWW3U",
-        "name":"BURST.ninja assignment wallet",
-        "description":"This is the assignment wallet for BURST.ninja pool.",
-        "balance":"474595",
-        "assignedMiners":675,
-        "successfulMiners":97,
-        "foundBlocks":1097,
-        "earnedAmount":"3212877"
-        */
         public MiningPool(String url, String dl) {
-            //final String postURL = "/burst?requestType=getMiningInfo";
-            //{"generationSignature":"43da9971d3931eef89ad06e510e65701433e1556a50685e2e94509746b1b2021",
-            // "baseTarget":"2913516","requestProcessingTime":0,
-            // "height":"264546","targetDeadline":2592000}
             mURL = url;
             mDeadline = dl;
 
-            getRewardID(url);
+            //getRewardID(url);
             /*
             GetAsync jsonCall = new GetAsync(mURL + postURL) {
                 @Override

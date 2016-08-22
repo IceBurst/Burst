@@ -5,6 +5,8 @@ package burstcoin.com.burst;
  */
 
 import android.util.Log;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedInputStream;
@@ -27,8 +29,10 @@ public class JSONParser {
     StringBuilder result;
     URL urlObj;
     JSONObject jObj = null;
+    public JSONArray jArray = null;
     StringBuilder sbParams;
     String paramsString;
+    final String TAG = "JSONParser";
 
     public JSONObject makeHttpRequest(String url, String method, HashMap<String, String> params) {
 
@@ -113,10 +117,18 @@ public class JSONParser {
         // try parse the string to a JSON object
         try {
             jObj = new JSONObject(result.toString());
+            return jObj;
         } catch (JSONException e) {
-            Log.e("JSON Parser", "Error parsing data " + e.toString());
+            // This can only handle a single JSON object, not an entire JSON Array
+            Log.e("JSON Parser", "Error parsing Object: " + e.toString());
         }
 
+        try {
+            jArray = new JSONArray(result.toString());
+        } catch (Exception e) {
+            Log.e("JSON Array Parser", "Error parsing Array: " + e.toString());
+            Log.e(TAG, e.getLocalizedMessage());
+        }
         // return JSON Object
         return jObj;
     }

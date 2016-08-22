@@ -78,8 +78,8 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
         mMiningService = new MiningService(this, mPlotFiles, mNumericID);
 
         // ToDo: v2.1 allow pool changer
-        //mMiningPools = new MiningPools();
-        //mMiningPools.loadMiningPools();
+        mMiningPools = new MiningPools();
+        mMiningPools.loadMiningPools();
 
         int mPlotCt = mPlotter.getPlotSize();
         if (mPlotCt > 0) {
