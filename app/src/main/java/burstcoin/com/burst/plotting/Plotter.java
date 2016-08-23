@@ -75,10 +75,14 @@ public class Plotter {
             }
 
             for (int i = 0; i<mGBs; i++) {
-                PlotFile mNewPlot = new PlotFile(callback);
-                mNewPlot.setNumericID(mNumericID);
-                mNewPlot.setStartNonce((mStartingGB+i) * PlotFile.NonceToComplete);
-                mNewPlot.plot();
+                try {
+                    PlotFile mNewPlot = new PlotFile(callback);
+                    mNewPlot.setNumericID(mNumericID);
+                    mNewPlot.setStartNonce((mStartingGB + i) * PlotFile.NonceToComplete);
+                    mNewPlot.plot();
+                } catch (IOException e) {
+                    break;
+                }
                 if (PowerTool.isOnPower() == false) {       // after each GB check to see if were plugged in
                     wakeLock.release();
                     mCPULockedOn = false;
