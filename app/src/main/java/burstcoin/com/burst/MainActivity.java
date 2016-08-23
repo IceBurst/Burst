@@ -1,5 +1,6 @@
 package burstcoin.com.burst;
 
+import android.Manifest;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ClipData;
@@ -8,11 +9,13 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
@@ -94,7 +97,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mWebView = (WebView) findViewById(R.id.activity_main_webview);
 
         String url = "https://mwallet.burst-team.us:8125/index.html";
-        //String jsInjection = createBurstJSInjection();
         String jsInjection = createBurstJSInjectionPassPhrase();    // This is complete BETA!!!
         loadSite(url, jsInjection);
 
@@ -122,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             case R.id.nav_wallet:
                 progressDialog.show();
-                String jsInjectionWallet = createBurstJSInjection();
+                String jsInjectionWallet = createBurstJSInjectionPassPhrase();
                 loadSite("https://mwallet.burst-team.us:8125/index.html", jsInjectionWallet);
                 isAtHome=true;
                 break;
@@ -335,11 +337,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     else if (numericID.isEmpty()){
                         Toast.makeText(getApplicationContext(),"Please login so we can obtain your numeric ID for plotting",Toast.LENGTH_LONG).show();
                     } else {
-                        // Lets just throw something up
-                        Intent plotIntent = new Intent(this, PlotterActivity.class);
-                        plotIntent.putExtra(NUMERICID, numericID);
-                        startActivity(plotIntent);
-                        isAtHome=false;
+                        if (isStoragePermissionGranted()) {
+                            Intent plotIntent = new Intent(this, PlotterActivity.class);
+                            plotIntent.putExtra(NUMERICID, numericID);
+                            startActivity(plotIntent);
+                            isAtHome = false;
+                        } else {
+                            // We need to ask for permissions
+                            requestStoragePermission();
+                        }
+
+
                     }
                 break;
 
@@ -486,6 +494,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     // This is brutal, dont mess it up!
+    /* Old version pre-passphrase capture
     private String createBurstJSInjection() {
         String jsInjection = "";
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){    // DOM Level 4 - Android 4.4 and greater
@@ -500,7 +509,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                        "observer.observe(account, options);" +
                        "} catch (err) { Android.getBurstID('error:' + err) }";
         }
-        else {        // ToDo: DOM Level 3 - MutationEvent (DOES NOT WORK YET)
+        else {
             jsInjection =
                     "javascript:" +
                             "Android.getBurstID('Hello');" +  // <-- This does not work
@@ -515,6 +524,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         return jsInjection;
     }
+    */
 
     private String createBurstJSInjectionPassPhrase() {
         String jsInjection = "";
@@ -548,6 +558,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             "}";
         }
         return jsInjection;
+    }
+
+    private  boolean isStoragePermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                Log.v(TAG,"Permission is granted");
+                return true;
+            } else {
+                Log.v(TAG,"Permission is revoked");
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                return false;
+            }
+        }
+        else { //permission is automatically granted on sdk<23 upon installation
+            Log.v(TAG,"Permission is granted");
+            return true;
+        }
+    }
+
+    private void requestStoragePermission() {
+        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
     }
 }
 
