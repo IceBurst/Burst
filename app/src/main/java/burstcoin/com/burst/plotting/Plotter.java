@@ -53,12 +53,13 @@ public class Plotter {
         mPlotFiles.deletePlot();
     }
 
+    /* Old Legacy before we allowed multi GB of plotting in sequence
     public void plot1GB() {
         PlotFile mNewPlot = new PlotFile(callback);
         mNewPlot.setNumericID(mNumericID);
         mNewPlot.setStartNonce(mPlotFiles.size()*PlotFile.NonceToComplete);
         mNewPlot.plot();
-    }
+    }  */
 
     public void plotGBs(int mGBs) {
         int mStartingGB = mPlotFiles.size();

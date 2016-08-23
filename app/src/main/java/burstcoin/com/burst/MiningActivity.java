@@ -45,6 +45,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
     private TextView mTxtAccepted;
 
     private ImageView mImgMined;
+    private MediaPlayer mMediaPlayer;
 
     private String mPassPhrase = "";
     private String mRewardID = "";
@@ -232,8 +233,8 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                             mImgMined.setVisibility(View.VISIBLE);
                             mTxtAccepted.setVisibility(View.VISIBLE);
                             if(mPlayedSound == false ){
-                                MediaPlayer mp = MediaPlayer.create(BurstContext.getAppContext(),  R.raw.chaching);
-                                mp.start();
+                                mMediaPlayer = MediaPlayer.create(BurstContext.getAppContext(),  R.raw.chaching);
+                                mMediaPlayer.start();
                             }
                             mPlayedSound = true;
                         }

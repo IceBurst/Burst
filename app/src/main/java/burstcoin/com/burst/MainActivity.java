@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public final static String NUMERICID = "burstcoin.com.burst.NUMERICID";
     public final static String PASSPHRASE = "burstcoin.com.burst.PASSPHRASE";
     private final String TAG = "MainActivity";
+    final static int PERMISSION_STORAGE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -383,8 +384,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case "GOTBURSTID":
                 if (args[1].contains("SUCCESS"))
                     this.burstID = args[2];
-                    BurstUtil fetchNumericID = new BurstUtil(this);
-                    fetchNumericID.getNumericIDFromBurstID(burstID, this);
+                    this.numericID = BurstUtil.getNumericIDFromLocal(burstID, this);
+                    if (numericID.equals("")) {
+                        BurstUtil fetchNumericID = new BurstUtil(this);
+                        fetchNumericID.getNumericIDFromBurstID(burstID, this);
+                    }
                 break;
             case "GOTNUMERICID":
                 if (args[1].contains("SUCCESS"))
@@ -568,7 +572,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 return true;
             } else {
                 Log.v(TAG,"Permission is revoked");
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_STORAGE);
                 return false;
             }
         }
@@ -579,7 +583,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void requestStoragePermission() {
-        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.WAKE_LOCK}, PERMISSION_STORAGE);
+        // do I also need to put WAKE_LOCK in here?
+        //ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WAKE_LOCK},2);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_STORAGE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                    // Lets tell them how pissed we are
+                }
+            }
+        }
     }
 }
 
