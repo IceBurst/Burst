@@ -174,7 +174,8 @@ public class MiningService implements IntMinerDeadLine{
                 urlConnection.disconnect();
             }
         } catch (Exception e) {
-            Log.d(TAG, e.getLocalizedMessage());
+            //Log.d(TAG, e.getLocalizedMessage());
+            Log.d(TAG,"GET Faulted");
         }
         return result;
     }
