@@ -48,26 +48,29 @@ class PostAsync extends AsyncTask<String, String, JSONObject> {
     }
 
     protected void onPostExecute(JSONObject json) {
-
+        // This should all be overridden
         int success = 0;
         String message = "";
 
         if (json != null) {
             //Toast.makeText(MainActivity.this, json.toString(),         Toast.LENGTH_LONG).show();
 
+            /*
             try {
-                success = json.getInt(TAG_SUCCESS);
-                message = json.getString(TAG_MESSAGE);
+                //success = json.getInt(TAG_SUCCESS);
+                //message = json.getString(TAG_MESSAGE);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+            */
         }
-
+        /*
         if (success == 1) {
             //Log.d("Success!", message);
         }else{
             //Log.d("Failure", message);
         }
+        */
     }
 
 }

@@ -27,8 +27,9 @@ import burstcoin.com.burst.tools.BurstContext;
 public class MiningActivity extends AppCompatActivity implements IntMiningStatus, IntProvider{
 
     final static String TAG = "MiningActivity";
-    final static String sPoolServer = "mobile.burst-team.us";
-    final static String sPoolNumericID = "18401070918313114651";
+    final static String sPoolServer = "mobile.burst-team.us:8080";
+    //final static String sPoolNumericID = "18401070918313114651";  // mobile
+    final static String sPoolNumericID = "16647933376790760136"; // Mobile:8080
 
     private MiningService mMiningService;
     private MiningPools mMiningPools;
