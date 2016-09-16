@@ -451,9 +451,13 @@ public class BurstUtil {
             return "";
 
         for(String p : mCards) {
-            StatFs stat = new StatFs(p);
-            if(stat.getTotalBytes() > mBytes) {
-                path = p;
+            try {
+                StatFs stat = new StatFs(p);
+                if (stat.getTotalBytes() > mBytes) {
+                    path = p;
+                }
+            } catch (RuntimeException e) {
+                Log.e (TAG, "Runtime Caught; Possible non-existant Path");
             }
         }
         return path;

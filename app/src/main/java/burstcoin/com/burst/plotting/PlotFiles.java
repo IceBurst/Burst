@@ -68,15 +68,19 @@ public class PlotFiles {
         Log.d("Files", "Path: " + mPath);
         File f = new File(mPath);
         File file[] = f.listFiles();
-        Log.d("Files", "Size: "+ file.length);
-        for (int i=0; i < file.length; i++)
-        {
-            workingFileName = file[i].getName();
-            Log.d(TAG, "FileName:" + workingFileName);
-            if(workingFileName.contains(mNumericID)) {
-                mPlotFiles.add(new PlotFile(workingFileName, file.length)); // Put it on the stack if it starts with numericID
-                Log.d(TAG,"Found Plot:" + workingFileName);
+        // Maybe people are trying to open Mining before Plotting and we have no files
+        try {
+            Log.d("Files", "Size: " + file.length);
+            for (int i = 0; i < file.length; i++) {
+                workingFileName = file[i].getName();
+                Log.d(TAG, "FileName:" + workingFileName);
+                if (workingFileName.contains(mNumericID)) {
+                    mPlotFiles.add(new PlotFile(workingFileName, file.length)); // Put it on the stack if it starts with numericID
+                    Log.d(TAG, "Found Plot:" + workingFileName);
+                }
             }
+        }  catch (NullPointerException e) {
+            Log.e(TAG, "NULL Pointer Caught");
         }
     }
 

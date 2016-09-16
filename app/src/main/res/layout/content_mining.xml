@@ -100,10 +100,11 @@
         android:textColor="@color/colorAccentPressed"
         android:textStyle="bold" />
 
+    <!-- Taken out of button below -->
+    <!-- android:text="Start Mining" Set by Code -->
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Start Mining"
         android:minWidth="150dip"
         android:id="@+id/btnMinerOp"
         android:layout_marginBottom="65dp"

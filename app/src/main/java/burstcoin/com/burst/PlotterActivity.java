@@ -177,7 +177,7 @@ public class PlotterActivity extends AppCompatActivity implements IntPlotStatus 
             mTotalSpace = BurstUtil.getTotalSpaceInGB();
             mFreeSpace =  BurstUtil.getFreeSpaceInGB();
         } catch (Exception e) {
-            Log.d(TAG, "Something went wrong trying to get Space");
+            Log.e(TAG, "Something went wrong trying to get Space");
         }
         String mStringTotalSpace = Double.toString(mTotalSpace);
         String mStringFreeSpace = Double.toString(mFreeSpace);

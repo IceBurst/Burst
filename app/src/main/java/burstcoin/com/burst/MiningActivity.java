@@ -48,6 +48,8 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
     private ImageView mImgMined;
     private MediaPlayer mMediaPlayer;
 
+    private boolean mIsMining;
+    private String mBestDeadline;
     private String mPassPhrase = "";
     private String mRewardID = "";
     private boolean mRewardSet = false;
@@ -78,6 +80,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
         mPlotter = new Plotter(mNumericID);
         mPlotFiles = new PlotFiles(BurstUtil.getPathToSD(), mNumericID);
         mMiningService = new MiningService(this, mPlotFiles, mNumericID);
+        mIsMining = false;
 
         // ToDo: v2.1 allow pool changer
         mMiningPools = new MiningPools();
@@ -156,6 +159,33 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
         if (mPlotCt > 0 && mRewardSet) {
             mMiningService.start();
         }
+
+    }
+
+    @Override
+    protected  void onResume() {
+        super.onResume();
+        // Check if we think we are mining
+        if (mIsMining) {
+            mBtnMiningAction.setText("STOP MINING");
+            mTxtDL.setText(mBestDeadline);
+        } else {
+            mBtnMiningAction.setText("START MINING");
+
+        }
+    }
+
+    @Override
+    protected  void onRestart() {
+        super.onRestart();
+        // Check if we think we are mining
+        if (mIsMining) {
+            mBtnMiningAction.setText("STOP MINING");
+            mTxtDL.setText(mBestDeadline);
+        } else {
+            mBtnMiningAction.setText("START MINING");
+
+        }
     }
 
     @Override
@@ -168,6 +198,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
         switch (args[0]) {
             case "MINING":
                 if (args[1].equals("STARTED")) {
+                    mIsMining = true;
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -176,6 +207,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                     });
                 }
                 if (args[1].equals("STOPPED")) {
+                    mIsMining = false;
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -219,6 +251,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                 break;
             case "DEADLINE":
                 final String mDL = args[1];
+                mBestDeadline = mDL;
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

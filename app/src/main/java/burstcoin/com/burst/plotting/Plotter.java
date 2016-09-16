@@ -93,7 +93,7 @@ public class Plotter {
                 wakeLock.release();
             }
         } catch (Exception e) {
-            callback.notice("TOAST", "ERROR IN POWERMANAGER");
+            callback.notice("TOAST", "ERROR: Require access to power management");
         }
     }
 }
