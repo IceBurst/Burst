@@ -43,11 +43,15 @@
             android:label="Plotter"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme">
+            <meta-data
+                 android:name="android.support.PARENT_ACTIVITY"
+                 android:value="burstcoin.com.burst.MainActivity" />
         </activity>
 
         <activity
             android:name=".MiningActivity"
             android:label="@string/title_activity_mining"
+            android:launchMode="singleTop"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme">
             <meta-data

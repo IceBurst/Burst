@@ -65,6 +65,7 @@ public class Plotter {
         int mStartingGB = mPlotFiles.size();
 
         try {
+            /*
             boolean mOnPower = PowerTool.isOnPower();
             boolean mCPULockedOn = false;
             PowerManager powerManager = (PowerManager) BurstContext.getAppContext().getSystemService(Context.POWER_SERVICE);
@@ -74,6 +75,7 @@ public class Plotter {
                 wakeLock.acquire();
                 mCPULockedOn = true;
             }
+            */
 
             for (int i = 0; i<mGBs; i++) {
                 try {
@@ -82,16 +84,20 @@ public class Plotter {
                     mNewPlot.setStartNonce((mStartingGB + i) * PlotFile.NonceToComplete);
                     mNewPlot.plot();
                 } catch (IOException e) {
+                    callback.notice("TOAST", "Error: IOException Plotting");
                     break;
                 }
+                /*
                 if (PowerTool.isOnPower() == false) {       // after each GB check to see if were plugged in
                     wakeLock.release();
                     mCPULockedOn = false;
-                }
+                }*/
             }
+            /*
             if (mCPULockedOn) {
                 wakeLock.release();
             }
+            */
         } catch (Exception e) {
             callback.notice("TOAST", "ERROR: Require access to power management");
         }

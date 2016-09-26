@@ -63,6 +63,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public final static String PASSPHRASE = "burstcoin.com.burst.PASSPHRASE";
     private final String TAG = "MainActivity";
     final static int PERMISSION_STORAGE = 1;
+    final static int PERMISSION_WAKELOCK = 2;
+
+    private int navPath = 0;
+    final static int NAV_PLOTTING = 5;
+    final static int NAV_MINING = 6;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -338,17 +343,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     else if (numericID.isEmpty()){
                         Toast.makeText(getApplicationContext(),"Please login so we can obtain your numeric ID for plotting",Toast.LENGTH_LONG).show();
                     } else {
-                        if (isStoragePermissionGranted()) {
-                            Intent plotIntent = new Intent(this, PlotterActivity.class);
-                            plotIntent.putExtra(NUMERICID, numericID);
-                            startActivity(plotIntent);
-                            isAtHome = false;
+                        navPath = 5;
+                        if (isStoragePermissionGranted() && isPowerManagerPermissionGranted()) {
+                            menuNavigator();
                         } else {
                             // We need to ask for permissions
                             requestStoragePermission();
                         }
-
-
                     }
                 break;
 
@@ -358,19 +359,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 else if (numericID.isEmpty()){
                     Toast.makeText(getApplicationContext(),"Please login so we can obtain your numeric ID for plotting",Toast.LENGTH_LONG).show();
                 } else {
-                    Intent miningIntent = new Intent(this, MiningActivity.class);
-                    miningIntent.putExtra(NUMERICID, numericID);
-                    miningIntent.putExtra(PASSPHRASE, mPassPhrase);
-                    startActivity(miningIntent);
-                    isAtHome = false;
-                    break;
+                    navPath = 6;
+                    if (isStoragePermissionGranted() && isPowerManagerPermissionGranted()) {
+                        menuNavigator();
+                        break;
+                    } else {
+                        // We need to ask for permissions
+                        requestStoragePermission();
+                    }
                 }
             default:
 
         }
-
-
         mDrawer.closeDrawers();
+    }
+
+    private void menuNavigator() {
+        // This is a
+        switch (navPath) {
+            case NAV_PLOTTING:
+                Intent plotIntent = new Intent(this, PlotterActivity.class);
+                plotIntent.putExtra(NUMERICID, numericID);
+                startActivity(plotIntent);
+                isAtHome = false;
+              break;
+            case  NAV_MINING:
+                Intent miningIntent = new Intent(this, MiningActivity.class);
+                miningIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                miningIntent.putExtra(NUMERICID, numericID);
+                miningIntent.putExtra(PASSPHRASE, mPassPhrase);
+                startActivity(miningIntent);
+                isAtHome = false;
+              break;
+        }
     }
 
     // This is how Data is passed back to main via the IntProvider Class
@@ -585,7 +606,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void requestStoragePermission() {
         ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.WAKE_LOCK}, PERMISSION_STORAGE);
         // do I also need to put WAKE_LOCK in here?
-        //ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WAKE_LOCK},2);
+        //ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WAKE_LOCK},PERMISSION_WAKELOCK);
     }
 
     @Override
@@ -593,10 +614,38 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         switch (requestCode) {
             case PERMISSION_STORAGE: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
-                    // Lets tell them how pissed we are
+                    Log.v(TAG, "Permission Denied: STORAGE");
+                    // Lets tell them we can't work without this
+                    return;
+                }            }
+            case PERMISSION_WAKELOCK: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                    // Lets tell them we can't work without this
+                    Log.v(TAG, "Permission Denied: WAKELOCK");
+                    return;
                 }
             }
         }
+        menuNavigator();
     }
+
+    private boolean isPowerManagerPermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(Manifest.permission.WAKE_LOCK)
+                    == PackageManager.PERMISSION_GRANTED) {
+                Log.v(TAG,"WAKE_LOCK Permission is granted");
+                return true;
+            } else {
+                Log.v(TAG,"WAKE_LOCK Permission is revoked");
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WAKE_LOCK}, PERMISSION_WAKELOCK);
+                return false;
+            }
+        }
+        else { //permission is automatically granted on sdk<23 upon installation
+            Log.v(TAG,"Permission is granted");
+            return true;
+        }
+    }
+
 }
 

@@ -282,8 +282,6 @@ public class BurstUtil {
     }
 
     public void getRewardIDFromNumericID(final String numericID, final Context context) {
-
-        //String URL = "http://mobile.burst-team.us:8125/burst?requestType=getRewardRecipient&account=" + numericID;
         String URL = "https://mwallet.burst-team.us:8125/burst?requestType=getRewardRecipient&account=" + numericID;
         Log.d(TAG, "GetRewardID:"+URL);
         GetAsync jsonCall = new GetAsync(URL) {
@@ -355,7 +353,6 @@ public class BurstUtil {
             }*/
         };
         jsonCall.execute(url, "requestType","setRewardRecipient","recipient",mNumericID, "secretPhrase", mPassPhrase, "deadline","1440","feeNQT","100000000");
-        //jsonCall.execute(url, "requestType","setRewardRecipient","recipient",mNumericID, "secretPhrase", mPassPhrase );
     }
 
     // Get the Free Memory on the device
@@ -395,6 +392,16 @@ public class BurstUtil {
             else
             {
                 rv.add(rawExternalStorage);
+                final File externalStorageRoot = new File( "/storage/" );
+                final File[] files = externalStorageRoot.listFiles();
+
+                for ( final File file : files ) {
+                    if ( file.isDirectory() && file.canRead() && (file.listFiles().length > 0) ) {  // it is a real directory (not a USB drive)...
+                        Log.d(TAG, "External Storage: " + file.getAbsolutePath() + "\n");
+                        rv.add(file.getAbsolutePath());
+                    }
+                }
+                // Need to check each of the sub paths here, it can be under these roots
             }
         }
         else
@@ -409,6 +416,7 @@ public class BurstUtil {
             else
             {
                 final String path = Environment.getExternalStorageDirectory().getAbsolutePath();
+                Log.d(TAG,"getExternalStorageDir = " + path);
                 final String[] folders = DIR_SEPORATOR.split(path);
                 final String lastFolder = folders[folders.length - 1];
                 boolean isDigit = false;
@@ -452,8 +460,11 @@ public class BurstUtil {
 
         for(String p : mCards) {
             try {
+                Log.d(TAG, "Checking best against:" + p);
                 StatFs stat = new StatFs(p);
                 if (stat.getTotalBytes() > mBytes) {
+                    Log.d(TAG,"Biggest is:" + stat.getTotalBytes());
+                    mBytes = stat.getTotalBytes();
                     path = p;
                 }
             } catch (RuntimeException e) {

@@ -31,7 +31,4 @@ public class PowerTool {
         Log.d(TAG, "Device is not charging");
         return false;
     }
-
-    //class
-
 }
