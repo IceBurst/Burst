@@ -85,6 +85,7 @@ public class Plotter {
                     mNewPlot.plot();
                 } catch (IOException e) {
                     callback.notice("TOAST", "Error: IOException Plotting");
+                    Log.e(TAG,"STACK TRACE:", e);
                     break;
                 }
                 /*

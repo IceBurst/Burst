@@ -74,7 +74,8 @@ public class PlotFile {
             Log.d(TAG, "Writing to:" + mPlotFile);
             out = new FileOutputStream(mPlotFile);
         } catch (IOException ioex) {
-            mCallback.notice("TOAST", "ERROR GETTING OUTPUTSTREAM");
+            //Clear the plotting Window
+            mCallback.notice("PLOTTING", "NONCE", Integer.toString(NonceToComplete));
             throw ioex;
         }
         int staggeramt = 1;     // We are going to plot in simple 1NONCE, 256K chunks

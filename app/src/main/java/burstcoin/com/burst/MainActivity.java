@@ -385,7 +385,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
               break;
             case  NAV_MINING:
                 Intent miningIntent = new Intent(this, MiningActivity.class);
-                miningIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                miningIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 miningIntent.putExtra(NUMERICID, numericID);
                 miningIntent.putExtra(PASSPHRASE, mPassPhrase);
                 startActivity(miningIntent);

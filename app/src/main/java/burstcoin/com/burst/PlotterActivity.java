@@ -164,7 +164,8 @@ public class PlotterActivity extends AppCompatActivity implements IntPlotStatus 
         String mTotalMem = Long.toString(new BurstUtil().getTotalMemoryInMB(this));
         mTxtTest.setText("Free Memory "+mFreeMem+"MB of "+mTotalMem+"MB");
 
-       //updateCurrentPlotInfo();
+       // This is where we need to check for permission on a per activity
+        //updateCurrentPlotInfo();
 
         // This might be best in the Mining Activity
         //loadMiningPools();
