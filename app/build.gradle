@@ -7,8 +7,8 @@ android {
         applicationId "burstcoin.com.burst"
         minSdkVersion 16
         targetSdkVersion 23
-        versionName '2.0.2'
-        versionCode 202
+        versionName '2.0.4'
+        versionCode 204
     }
     buildTypes {
         release {

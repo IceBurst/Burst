@@ -3,7 +3,7 @@
     package="burstcoin.com.burst">
 
     <uses-sdk
-        android:minSdkVersion="19"
+        android:minSdkVersion="14"
         android:targetSdkVersion="22" />
 
     <!-- <uses-permission android:name="android.permission.READ_PHONE_STATE" /> -->

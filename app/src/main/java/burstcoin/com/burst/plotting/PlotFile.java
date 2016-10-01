@@ -1,5 +1,6 @@
 package burstcoin.com.burst.plotting;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.io.FileOutputStream;
@@ -73,6 +74,8 @@ public class PlotFile {
         try {
             Log.d(TAG, "Writing to:" + mPlotFile);
             out = new FileOutputStream(mPlotFile);
+            //out = openFileOutput(mPlotFile, Context.MODE_WORLD_WRITEABLE);
+
         } catch (IOException ioex) {
             //Clear the plotting Window
             mCallback.notice("PLOTTING", "NONCE", Integer.toString(NonceToComplete));

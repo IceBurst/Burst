@@ -33,6 +33,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+
+import burstcoin.com.burst.tools.BurstContext;
+
 import static java.lang.Character.digit;
 
 /**
@@ -377,10 +380,22 @@ public class BurstUtil {
         final Set<String> rv = new HashSet<String>();
         // Primary physical SD-CARD (not emulated)
         final String rawExternalStorage = System.getenv("EXTERNAL_STORAGE");
+
+        // This is how you access private external 2ndary storage now! on API 19+ when using Android 6.0 it's enforced
+        if ( Build.VERSION.SDK_INT >= 19 ) {
+            final File[] rawExternalStorages = BurstContext.getAppContext().getExternalFilesDirs(null);
+            for (File f : rawExternalStorages) {
+                    Log.d(TAG, "Added API19 External Storage: " + f.getAbsolutePath() );  // <-- This is getting the path I really want
+                    rv.add(f.getAbsolutePath());
+            }
+        }
+
         // All Secondary SD-CARDs (all exclude primary) separated by ":"
         final String rawSecondaryStoragesStr = System.getenv("SECONDARY_STORAGE");
         // Primary emulated SD-CARD
         final String rawEmulatedStorageTarget = System.getenv("EMULATED_STORAGE_TARGET");
+
+        Log.d(TAG, "MEDIA_MOUNTED? : " + Environment.MEDIA_MOUNTED);
         if(TextUtils.isEmpty(rawEmulatedStorageTarget))
         {
             // Device has physical external storage; use plain paths.
@@ -397,7 +412,7 @@ public class BurstUtil {
 
                 for ( final File file : files ) {
                     if ( file.isDirectory() && file.canRead() && (file.listFiles().length > 0) ) {  // it is a real directory (not a USB drive)...
-                        Log.d(TAG, "External Storage: " + file.getAbsolutePath() + "\n");
+                        Log.d(TAG, "Added External Storage: " + file.getAbsolutePath() );
                         rv.add(file.getAbsolutePath());
                     }
                 }
@@ -444,10 +459,12 @@ public class BurstUtil {
         if(!TextUtils.isEmpty(rawSecondaryStoragesStr))
         {
             // All Secondary SD-CARDs splited into array
+            Log.d(TAG, "rawSecondayStorageStr"+ rawSecondaryStoragesStr);
             final String[] rawSecondaryStorages = rawSecondaryStoragesStr.split(File.pathSeparator);
             Collections.addAll(rv, rawSecondaryStorages);
         }
         return rv.toArray(new String[rv.size()]);
+
     }
 
     public static String getBestPath() {
@@ -460,15 +477,17 @@ public class BurstUtil {
 
         for(String p : mCards) {
             try {
-                Log.d(TAG, "Checking best against:" + p);
+                File f = new File(p);
                 StatFs stat = new StatFs(p);
-                if (stat.getTotalBytes() > mBytes) {
+                Log.d(TAG, "Checking Path:" + p + " size:" + stat.getTotalBytes() + " isWritable?:" + f.canWrite());
+                if (stat.getTotalBytes() > mBytes && f.canWrite()) {    // Need to ensure we can plot to the location
                     Log.d(TAG,"Biggest is:" + stat.getTotalBytes());
                     mBytes = stat.getTotalBytes();
                     path = p;
                 }
             } catch (RuntimeException e) {
-                Log.e (TAG, "Runtime Caught; Possible non-existant Path");
+                Log.e (TAG, "Runtime Caught; Possible non-existant Path: " + p.toString());
+                Log.e (TAG, "STACK DUMP:", e);
             }
         }
         return path;
