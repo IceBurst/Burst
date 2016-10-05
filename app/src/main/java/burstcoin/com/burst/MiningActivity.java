@@ -24,11 +24,10 @@ import burstcoin.com.burst.plotting.PlotFiles;
 import burstcoin.com.burst.plotting.Plotter;
 import burstcoin.com.burst.tools.BurstContext;
 
-public class MiningActivity extends AppCompatActivity implements IntMiningStatus, IntProvider{
+public class MiningActivity extends AppCompatActivity implements IntMiningStatus, IntProvider {
 
     final static String TAG = "MiningActivity";
     final static String sPoolServer = "mobile.burst-team.us:8080";
-    //final static String sPoolNumericID = "18401070918313114651";  // mobile
     final static String sPoolNumericID = "16647933376790760136"; // Mobile:8080
 
     private MiningService mMiningService;
@@ -58,13 +57,14 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // This code is called when we reopen the mining activity!!
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mining);
 
         mNumericID = getIntent().getStringExtra(MainActivity.NUMERICID);
         mPassPhrase = getIntent().getStringExtra(MainActivity.PASSPHRASE);
 
-        mTxtGBPlot = (TextView)findViewById(R.id.txtGBPlot);
+        mTxtGBPlot = (TextView) findViewById(R.id.txtGBPlot);
         mTxtCurrentBlock = (TextView) findViewById(R.id.txtCurrentBlock);
         mTxtPoolSvr = (TextView) findViewById(R.id.txtPoolSvr);
         mTxtDL = (TextView) findViewById(R.id.txtCurrentDL);
@@ -83,8 +83,10 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
         mIsMining = false;
 
         // ToDo: v2.1 allow pool changer
+        /*
         mMiningPools = new MiningPools();
         mMiningPools.loadMiningPools();
+        */
 
         int mPlotCt = mPlotter.getPlotSize();
         if (mPlotCt > 0) {
@@ -157,15 +159,15 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
         getRewardID();
 
         if (mPlotCt > 0 && mRewardSet) {
+            // This never auto starts because getRewardID hasn't had time to happen yet. Need to move to a call back to make it auto
             mMiningService.start();
         }
 
     }
 
     @Override
-    protected  void onResume() {
+    protected void onResume() {
         super.onResume();
-        // Check if we think we are mining
         if (mIsMining) {
             mBtnMiningAction.setText("STOP MINING");
             mTxtDL.setText(mBestDeadline);
@@ -173,12 +175,16 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
             mBtnMiningAction.setText("START MINING");
 
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
     }
 
     @Override
     protected  void onRestart() {
         super.onRestart();
-        // Check if we think we are mining
         if (mIsMining) {
             mBtnMiningAction.setText("STOP MINING");
             mTxtDL.setText(mBestDeadline);
@@ -189,7 +195,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
     }
 
     @Override
-    public void notice(String... args) {
+    public synchronized void notice(String... args) {
         // This is when we get data back from the mining service
         String line = "";
         for (String s : args)
