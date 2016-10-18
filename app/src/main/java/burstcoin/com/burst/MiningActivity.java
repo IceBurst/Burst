@@ -121,7 +121,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
         */
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // Start or Stop Mining Button
+        // Start or Stop Mining Button, added power monitor
         mBtnMiningAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
