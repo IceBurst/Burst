@@ -1,8 +1,10 @@
 package burstcoin.com.burst;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.annotation.IntegerRes;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -23,6 +25,7 @@ import burstcoin.com.burst.plotting.IntPlotStatus;
 import burstcoin.com.burst.plotting.PlotFiles;
 import burstcoin.com.burst.plotting.Plotter;
 import burstcoin.com.burst.tools.BurstContext;
+import burstcoin.com.burst.tools.PowerTool;
 
 public class MiningActivity extends AppCompatActivity implements IntMiningStatus, IntProvider {
 
@@ -54,6 +57,11 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
     private boolean mRewardSet = false;
     private long mFinalConfirm;
     private boolean mPlayedSound = false;
+
+    // Allow to mine in the back ground
+    boolean mOnPower;
+    boolean mCPULockedOn;
+    PowerManager.WakeLock wakeLock;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,7 +127,20 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
             public void onClick(View v) {
                 if (mMiningService.running)
                     mMiningService.stop();
+                    if (PowerTool.isOnPower() == false) {       // after each GB check to see if were plugged in
+                        wakeLock.release();
+                        mCPULockedOn = false;
+                    }
+
                 else
+                    mOnPower = PowerTool.isOnPower();
+                    mCPULockedOn = false;
+                    PowerManager powerManager = (PowerManager) BurstContext.getAppContext().getSystemService(Context.POWER_SERVICE);
+                    wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"MyWakelockTag");
+                    if (mOnPower) {
+                        wakeLock.acquire();
+                        mCPULockedOn = true;
+                    }
                     mMiningService.start();
             }
         });
