@@ -216,7 +216,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
     }
 
     @Override
-    public synchronized void notice(String... args) {
+    public void notice(String... args) {
         // This is when we get data back from the mining service
         String line = "";
         for (String s : args)
@@ -288,18 +288,20 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                 break;
             case "SUBMITNONCE":
                 if(args[1].equals("SUCCESS")) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mImgMined.setVisibility(View.VISIBLE);
-                            mTxtAccepted.setVisibility(View.VISIBLE);
-                            if(mPlayedSound == false ){
-                                mMediaPlayer = MediaPlayer.create(BurstContext.getAppContext(),  R.raw.chaching);
-                                mMediaPlayer.start();
-                            }
-                            mPlayedSound = true;
+                    if (mPlayedSound == false) {
+                        synchronized (this) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mImgMined.setVisibility(View.VISIBLE);
+                                    mTxtAccepted.setVisibility(View.VISIBLE);
+                                    mMediaPlayer = MediaPlayer.create(BurstContext.getAppContext(), R.raw.chaching);
+                                    mMediaPlayer.start();
+                                }
+                            });
                         }
-                    });
+                        mPlayedSound = true;
+                    }
                 }
                 break;
         }
