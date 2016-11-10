@@ -1,6 +1,8 @@
 package burstcoin.com.burst;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -30,8 +32,10 @@ import burstcoin.com.burst.tools.PowerTool;
 public class MiningActivity extends AppCompatActivity implements IntMiningStatus, IntProvider {
 
     final static String TAG = "MiningActivity";
+
+    // ToDo: v2.1 read these values from preference
     final static String sPoolServer = "mobile.burst-team.us:8080";
-    final static String sPoolNumericID = "16647933376790760136"; // Mobile:8080
+    final static String sPoolNumericID = "16647933376790760136";
 
     private MiningService mMiningService;
     private MiningPools mMiningPools;
@@ -57,6 +61,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
     private boolean mRewardSet = false;
     private long mFinalConfirm;
     private boolean mPlayedSound = false;
+    private int mPlotCt;
 
     // Allow to mine in the back ground
     boolean mOnPower;
@@ -65,7 +70,6 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // This code is called when we reopen the mining activity!!
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mining);
 
@@ -90,13 +94,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
         mMiningService = new MiningService(this, mPlotFiles, mNumericID);
         mIsMining = false;
 
-        // ToDo: v2.1 allow pool changer
-        /*
-        mMiningPools = new MiningPools();
-        mMiningPools.loadMiningPools();
-        */
-
-        int mPlotCt = mPlotter.getPlotSize();
+        mPlotCt = mPlotter.getPlotSize();
         if (mPlotCt > 0) {
             mTxtGBPlot.setText(Integer.toString(mPlotCt) + " GB");
             mBtnMiningAction.setEnabled(true);
@@ -109,16 +107,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        /*
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-        */
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Start or Stop Mining Button, added power monitor
@@ -146,44 +135,39 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
         });
 
         // Set Mining Pool Button
+        final AlertDialog.Builder mConfirm = new AlertDialog.Builder(this);
         mBtnSetPool.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mBtnSetPool.setText("4 Confirms Remaining");
-                mBtnSetPool.setEnabled(false);                      // dont let the user push it again
-                mMiningService.start();
-                try {
-                    Thread.sleep(2000);  // this is very hacky!  But we need to make sure we get the current block
-                    mFinalConfirm = mMiningService.mActiveBlock.height + 4;
-                } catch (Exception e) {
+                // This is where we explain whats happening
+                mConfirm.setTitle("Are you sure?");
+                mConfirm.setMessage("Clicking \"Yes\" will set the pool assignment for this burst account to a new pool.");
+                mConfirm.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
 
-                }
-                // Send the Request
-                BurstUtil.setRewardAssignment(sPoolNumericID, mPassPhrase); // <-- Tie our passphrase to the Mining pool payout
+                    }
+                });
+                mConfirm.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        mBtnSetPool.setText("4 Confirms Remaining");
+                        mBtnSetPool.setEnabled(false);
+                        mMiningService.start();
+                        try {
+                            Thread.sleep(5000);                             // this is very hacky!  But we need to make sure we get the current block
+                            mFinalConfirm = mMiningService.mActiveBlock.height + 4;
+                        } catch (Exception e) {
+
+                        }
+                        // Send the Request
+                        BurstUtil.setRewardAssignment(sPoolNumericID, mPassPhrase);
+                    }
+                });
+                mConfirm.show();
             }
         });
-
-        // ToDo: Make this better in the future, this is hacky and only allows a single pool service
-        // Mobile Pool: 7Z2V-J9CF-NCW9-HWFRY  - 18401070918313114651
-        //  Points to EU.Pool Now
-
-        // https://mobile.burst-team.us:8125/burst?requestType=setRewardRecipient
-        // This is normally a post
-        // Android Miner BURST-4BS9-D8RC-MTMA-26VUW  --  1039034475383695111
-
-        // Ok, how do we do this, we have to ask the system
-        // getRewardRecipient
-        // account <-- Our numeric ID
-        // {"rewardRecipient":"1039034475383695111","requestProcessingTime":0}
-        // rewardRecipient has to be ^^^^^^^^^^^^  Otherwise tell them it's not set and give them a set button.
-
         getRewardID();
-
-        if (mPlotCt > 0 && mRewardSet) {
-            // This never auto starts because getRewardID hasn't had time to happen yet. Need to move to a call back to make it auto
-            mMiningService.start();
-        }
-
     }
 
     @Override
@@ -274,6 +258,9 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                 if (args[1].equals("SUCCESS")) {
                     mRewardID = args[2];
                     validateRewardID();
+                    if (mPlotCt > 0 && mRewardSet) {
+                        mMiningService.start();
+                    }
                 }
                 break;
             case "DEADLINE":
@@ -313,7 +300,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
     }
 
     private void validateRewardID() {
-        if(mRewardID.equals(sPoolNumericID)) {   // <-- MPool
+        if(mRewardID.equals(sPoolNumericID)) {
             mRewardSet = true;
             mBtnSetPool.setEnabled(false);
             mBtnSetPool.setVisibility(View.INVISIBLE);
