@@ -114,23 +114,24 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
         mBtnMiningAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mMiningService.running)
+                if (mMiningService.running) {
                     mMiningService.stop();
                     if (PowerTool.isOnPower() == false) {       // after each GB check to see if were plugged in
                         wakeLock.release();
                         mCPULockedOn = false;
                     }
-
-                else
+                }
+                else {
                     mOnPower = PowerTool.isOnPower();
                     mCPULockedOn = false;
                     PowerManager powerManager = (PowerManager) BurstContext.getAppContext().getSystemService(Context.POWER_SERVICE);
-                    wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"MyWakelockTag");
+                    wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyWakelockTag");
                     if (mOnPower) {
                         wakeLock.acquire();
                         mCPULockedOn = true;
                     }
                     mMiningService.start();
+                }
             }
         });
 
@@ -214,6 +215,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                         @Override
                         public void run() {
                             mBtnMiningAction.setText("STOP MINING");
+                            mTxtCurrentBlock.setText("Current Block: Update Coming");
                         }
                     });
                 }
@@ -225,6 +227,8 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                             mBtnMiningAction.setText("START MINING");
                             mImgMined.setVisibility(View.INVISIBLE);
                             mTxtAccepted.setVisibility(View.INVISIBLE);
+                            mTxtDL.setText("");
+                            mTxtCurrentBlock.setText("Current Block: Stopped");
                         }
                     });
                 }
