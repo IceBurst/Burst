@@ -34,8 +34,12 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
     final static String TAG = "MiningActivity";
 
     // ToDo: v2.1 read these values from preference
-    final static String sPoolServer = "mobile.burst-team.us:8080";
-    final static String sPoolNumericID = "16647933376790760136";
+    //final static String sPoolServer = "mobile.burst-team.us:8080";
+    //final static String sPoolNumericID = "16647933376790760136";
+
+    // Minor Update to new version
+    final static String sPoolServer = "pool.burst4all.com";
+    final static String sPoolNumericID = "13749927595717144118";
 
     private MiningService mMiningService;
     private MiningPools mMiningPools;

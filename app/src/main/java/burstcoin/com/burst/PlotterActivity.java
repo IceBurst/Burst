@@ -1,9 +1,13 @@
 package burstcoin.com.burst;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Build;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -43,6 +47,10 @@ public class PlotterActivity extends AppCompatActivity implements IntPlotStatus 
     private final static String TAG = "PlotterActivity";
     private Plotter mPlotter = null;
 
+    final static int PERMISSION_STORAGE = 1;
+    final static int PERMISSION_WAKELOCK = 2;
+    private int permLocks = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,15 +77,19 @@ public class PlotterActivity extends AppCompatActivity implements IntPlotStatus 
         mBtnPlot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // First thing we need is the value of the slider
-                final int mGBToPlot = mSizeBar.getProgress();
-                new Thread() {
-                    @Override
-                    public void run() {
-                        //mPlotter.plot1GB();
-                        mPlotter.plotGBs(mGBToPlot);
-                    }
-                }.start();
+                if (isStoragePermissionGranted() && isPowerManagerPermissionGranted()) {
+                    // First thing we need is get the value of the slider
+                    final int mGBToPlot = mSizeBar.getProgress();
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            mPlotter.plotGBs(mGBToPlot);
+                        }
+                    }.start();
+                } else {
+                    // No Permissions, we need to ask for permissions
+                    requestStoragePermission();
+                }
             }
         });
 
@@ -167,7 +179,7 @@ public class PlotterActivity extends AppCompatActivity implements IntPlotStatus 
        // This is where we need to check for permission on a per activity
         //updateCurrentPlotInfo();
 
-        // This might be best in the Mining Activity
+        // This will be added v2.1 under Settings, Select a Pool
         //loadMiningPools();
 
     }
@@ -219,12 +231,6 @@ public class PlotterActivity extends AppCompatActivity implements IntPlotStatus 
         }
     }
 
-    /*
-    private void updateCurrentPlotInfo() {
-
-    }
-    */
-
     @Override
     public void notice(String... args){
         // This is how we get data back from the Plotter Tool
@@ -269,4 +275,71 @@ public class PlotterActivity extends AppCompatActivity implements IntPlotStatus 
                 });
         }
     }
+
+    // This is for premissions as defined in Android 6.0
+    private  boolean isStoragePermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                Log.v(TAG,"Permission is granted");
+                return true;
+            } else {
+                Log.v(TAG,"Permission is revoked");
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_STORAGE);
+                return false;
+            }
+        }
+        else { //permission is automatically granted on sdk<23 upon installation
+            Log.v(TAG,"Permission is granted");
+            return true;
+        }
+    }
+
+    private void requestStoragePermission() {
+        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.WAKE_LOCK}, PERMISSION_STORAGE);
+        // do I also need to put WAKE_LOCK in here?
+        //ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WAKE_LOCK},PERMISSION_WAKELOCK);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_STORAGE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                    Log.v(TAG, "Permission Denied: STORAGE");
+                    mBtnPlot.setEnabled(false);
+                    // Lets tell them we can't work without this
+                    return;
+                }
+                mBtnPlot.setEnabled(true);
+                break;
+            }
+            case PERMISSION_WAKELOCK: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                    // Lets tell them we can't work without this
+                    Log.v(TAG, "Permission Denied: WAKELOCK");
+                    return;
+                }
+            }
+        }
+    }
+
+    private boolean isPowerManagerPermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(Manifest.permission.WAKE_LOCK)
+                    == PackageManager.PERMISSION_GRANTED) {
+                Log.v(TAG,"WAKE_LOCK Permission is granted");
+                return true;
+            } else {
+                Log.v(TAG,"WAKE_LOCK Permission is revoked");
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WAKE_LOCK}, PERMISSION_WAKELOCK);
+                return false;
+            }
+        }
+        else { //permission is automatically granted on sdk<23 upon installation
+            Log.v(TAG,"Permission is granted");
+            return true;
+        }
+    }
+
 }

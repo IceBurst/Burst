@@ -27,6 +27,7 @@
             android:theme="@style/AppTheme.ActionBar.Transparent">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -53,8 +54,8 @@
             android:name=".MiningActivity"
             android:label="@string/title_activity_mining"
             android:launchMode="singleInstance"
-            android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -71,6 +72,15 @@
                 android:value="burstcoin.com.burst.MainActivity" />
         </activity>
         -->
+        <activity
+            android:name=".PrefActivity"
+            android:label="@string/title_activity_pref"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="burstcoin.com.burst.MainActivity" />
+        </activity>
     </application>
 
 </manifest>
