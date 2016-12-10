@@ -41,8 +41,9 @@ public class MiningService implements IntMinerDeadLine{
     // Used for the GetBlockInfo from the Pool
     Timer mPoller;
     static int POLL_SECONDS = 3;
-    //static String poolUrl = "http://mobile.burst-team.us";
-    static String poolUrl = "http://mobile.burst-team.us:8080";
+    // This need to be a static pulled some a central point
+    static String poolUrl = "http://pool.burst4all.com";
+    //static String poolUrl = "http://mobile.burst-team.us:8080";
     static String poolGetBlockInfo = "/burst?requestType=getMiningInfo";
 
     // This is where we stack up our mining Threads
