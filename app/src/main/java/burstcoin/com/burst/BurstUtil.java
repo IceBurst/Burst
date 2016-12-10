@@ -384,9 +384,13 @@ public class BurstUtil {
         // This is how you access private external 2ndary storage now! on API 19+ when using Android 6.0 it's enforced
         if ( Build.VERSION.SDK_INT >= 19 ) {
             final File[] rawExternalStorages = BurstContext.getAppContext().getExternalFilesDirs(null);
-            for (File f : rawExternalStorages) {
-                    Log.d(TAG, "Added API19 External Storage: " + f.getAbsolutePath() );  // <-- This is getting the path I really want
+            if (rawExternalStorages.length > 0) {
+                for (File f : rawExternalStorages) {
+                    Log.d(TAG, "Added API19 External Storage: " + f.getAbsolutePath());  // <-- This is getting the path I really want
                     rv.add(f.getAbsolutePath());
+                }
+            } else {
+                Log.d(TAG, "No ExternalFileDirs returned by system");
             }
         }
 
