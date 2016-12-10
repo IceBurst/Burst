@@ -117,7 +117,7 @@ public class MiningService implements IntMinerDeadLine{
         }
     }
 
-    public void SubmitShare(Long mNonce) {
+    public void SubmitShare(final Long mNonce) {
         String URL = poolUrl + "/burst/?requestType=submitNonce&secretPhrase=pool-mining&nonce=" + String.valueOf(mNonce) + "&accountId=" + mNumericID;
         if (mBestdeadline.compareTo(BigInteger.valueOf(mActiveBlock.targetDeadline)) < 0) {
             Log.d(TAG, "Submitting Share:" + mNonce);
@@ -130,6 +130,7 @@ public class MiningService implements IntMinerDeadLine{
                             String mRespond = json.getString("result");
                             if(mRespond.equals("success")) {
                                 mCallback.notice("SUBMITNONCE", "SUCCESS");
+                                Log.d(TAG, "Nonce Accepted by Pool:" + mNonce);
                             }
                         } catch (JSONException e) {
                             mCallback.notice("SUBMITNONCE", "INVALID");
