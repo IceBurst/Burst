@@ -121,7 +121,12 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                 if (mMiningService.running) {
                     mMiningService.stop();
                     if (PowerTool.isOnPower() == false) {       // after each GB check to see if were plugged in
-                        wakeLock.release();
+                        try {
+                            wakeLock.release();
+                        }
+                        catch (Exception e) {
+                            Log.e(TAG, "WakeLock.Release threw an error: " + e.getLocalizedMessage());
+                        }
                         mCPULockedOn = false;
                     }
                 }
