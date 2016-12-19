@@ -38,7 +38,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
     //final static String sPoolNumericID = "16647933376790760136";
 
     // Minor Update to new version
-    final static String sPoolServer = "pool.burst4all.com";
+    final static String sPoolServer = "m.burst4all.com";
     final static String sPoolNumericID = "13749927595717144118";
 
     private MiningService mMiningService;
@@ -46,7 +46,6 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
     private Plotter mPlotter;
     private PlotFiles mPlotFiles;
     private String mNumericID;
-
     private Button mBtnMiningAction;
     private Button mBtnSetPool;
     private TextView mTxtCurrentBlock;

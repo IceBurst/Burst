@@ -42,7 +42,7 @@ public class MiningService implements IntMinerDeadLine{
     Timer mPoller;
     static int POLL_SECONDS = 3;
     // This need to be a static pulled some a central point
-    static String poolUrl = "http://pool.burst4all.com";
+    static String poolUrl = "http://m.burst4all.com";
     //static String poolUrl = "http://mobile.burst-team.us:8080";
     static String poolGetBlockInfo = "/burst?requestType=getMiningInfo";
 
