@@ -239,6 +239,11 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                             mTxtCurrentBlock.setText("Current Block: Stopped");
                         }
                     });
+                    try {
+                        mMediaPlayer.release();
+                    } catch (Exception e){
+
+                    }
                 }
                 break;
             case "BLOCK":
@@ -251,6 +256,11 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                             mImgMined.setVisibility(View.INVISIBLE);
                             mTxtAccepted.setVisibility(View.INVISIBLE);
                             mPlayedSound = false;
+                            try {
+                                mMediaPlayer.release();
+                            } catch (Exception e){
+                                // Catch a null reference
+                            }
                             mTxtDL.setText("N/A");
 
                             if (mFinalConfirm != 0) {
