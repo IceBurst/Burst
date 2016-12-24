@@ -3,6 +3,7 @@ package burstcoin.com.burst;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -55,6 +56,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
     private TextView mTxtAccepted;
 
     private ImageView mImgMined;
+    private boolean mCHACHING;
     private MediaPlayer mMediaPlayer;
 
     private boolean mIsMining;
@@ -96,6 +98,9 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
         mPlotFiles = new PlotFiles(BurstUtil.getPathToSD(), mNumericID);
         mMiningService = new MiningService(this, mPlotFiles, mNumericID);
         mIsMining = false;
+
+        SharedPreferences settings = getSharedPreferences("MINING", 0);
+        mCHACHING = settings.getBoolean("CHACHING", false);
 
         mPlotCt = mPlotter.getPlotSize();
         if (mPlotCt > 0) {
@@ -297,7 +302,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                 break;
             case "SUBMITNONCE":
                 if(args[1].equals("SUCCESS")) {
-                    if (mPlayedSound == false) {
+                    if (mPlayedSound == false && mCHACHING) {
                         synchronized (this) {
                             runOnUiThread(new Runnable() {
                                 @Override
@@ -305,7 +310,18 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                                     mImgMined.setVisibility(View.VISIBLE);
                                     mTxtAccepted.setVisibility(View.VISIBLE);
                                     mMediaPlayer = MediaPlayer.create(BurstContext.getAppContext(), R.raw.chaching);
-                                    mMediaPlayer.start();
+                                    try {
+                                        mMediaPlayer.start();
+                                        mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                            public void onCompletion(MediaPlayer mMediaPlayer) {
+                                                mMediaPlayer.release();
+                                            };
+                                        });
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        // Stupid Media Player no subtitle controller set
+                                    }
                                 }
                             });
                         }

@@ -368,6 +368,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         requestStoragePermission();
                     }
                 }
+                break;
+            case R.id.nav_settings: // User Preferences
+                Intent prefIntent = new Intent(this, PrefActivity.class);
+                prefIntent.putExtra(NUMERICID, numericID);
+                startActivity(prefIntent);
+
+                isAtHome = false;
+                break;
+
+
             default:
 
         }
@@ -385,7 +395,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
               break;
             case  NAV_MINING:
                 Intent miningIntent = new Intent(this, MiningActivity.class);
-                miningIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                miningIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                //miningIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 miningIntent.putExtra(NUMERICID, numericID);
                 miningIntent.putExtra(PASSPHRASE, mPassPhrase);
                 startActivity(miningIntent);
