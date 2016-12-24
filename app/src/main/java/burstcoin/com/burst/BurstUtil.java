@@ -399,7 +399,7 @@ public class BurstUtil {
         // Primary emulated SD-CARD
         final String rawEmulatedStorageTarget = System.getenv("EMULATED_STORAGE_TARGET");
 
-        Log.d(TAG, "MEDIA_MOUNTED? : " + Environment.MEDIA_MOUNTED);
+        Log.v(TAG, "MEDIA_MOUNTED? : " + Environment.MEDIA_MOUNTED);
         if(TextUtils.isEmpty(rawEmulatedStorageTarget))
         {
             // Device has physical external storage; use plain paths.

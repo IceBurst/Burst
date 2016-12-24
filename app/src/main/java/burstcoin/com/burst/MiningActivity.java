@@ -302,13 +302,13 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
                 break;
             case "SUBMITNONCE":
                 if(args[1].equals("SUCCESS")) {
+                    mImgMined.setVisibility(View.VISIBLE);
+                    mTxtAccepted.setVisibility(View.VISIBLE);
                     if (mPlayedSound == false && mCHACHING) {
                         synchronized (this) {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mImgMined.setVisibility(View.VISIBLE);
-                                    mTxtAccepted.setVisibility(View.VISIBLE);
                                     mMediaPlayer = MediaPlayer.create(BurstContext.getAppContext(), R.raw.chaching);
                                     try {
                                         mMediaPlayer.start();
