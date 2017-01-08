@@ -73,6 +73,8 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
     boolean mCPULockedOn;
     PowerManager.WakeLock wakeLock;
 
+    SharedPreferences settings;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,7 +101,7 @@ public class MiningActivity extends AppCompatActivity implements IntMiningStatus
         mMiningService = new MiningService(this, mPlotFiles, mNumericID);
         mIsMining = false;
 
-        SharedPreferences settings = getSharedPreferences("MINING", 0);
+        settings = getSharedPreferences("MINING", 0);
         mCHACHING = settings.getBoolean("CHACHING", false);
 
         mPlotCt = mPlotter.getPlotSize();

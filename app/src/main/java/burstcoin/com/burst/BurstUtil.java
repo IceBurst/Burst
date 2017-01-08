@@ -386,8 +386,14 @@ public class BurstUtil {
             final File[] rawExternalStorages = BurstContext.getAppContext().getExternalFilesDirs(null);
             if (rawExternalStorages.length > 0) {
                 for (File f : rawExternalStorages) {
-                    Log.d(TAG, "Added API19 External Storage: " + f.getAbsolutePath());  // <-- This is getting the path I really want
-                    rv.add(f.getAbsolutePath());
+                    try {
+                        if (f != null) {
+                            Log.d(TAG, "Added API19 External Storage: " + f.getAbsolutePath());  // <-- This is getting the path I really want
+                            rv.add(f.getAbsolutePath());
+                        }
+                    } catch (Exception e) {
+
+                    }
                 }
             } else {
                 Log.d(TAG, "No ExternalFileDirs returned by system");

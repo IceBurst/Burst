@@ -73,4 +73,33 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
 
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/txtSecondsPoll"
+        android:layout_below="@+id/cbSound"
+        android:layout_alignLeft="@+id/cbSound"
+        android:layout_alignStart="@+id/cbSound"
+        android:editable="false"
+        android:numeric="integer"
+        android:text="2"
+        android:layout_toLeftOf="@+id/btnDone"
+        android:layout_toStartOf="@+id/btnDone" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Poll Time (sec)"
+        android:id="@+id/staticPollTime"
+        android:layout_below="@+id/cbSound"
+        android:layout_toRightOf="@+id/txtSecondsPoll"
+        android:layout_alignBottom="@+id/txtSecondsPoll"
+        android:layout_alignRight="@+id/cbSound"
+        android:layout_alignEnd="@+id/cbSound"
+        android:gravity="center_vertical" />
+
+
 </RelativeLayout>

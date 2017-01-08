@@ -1,10 +1,12 @@
 package burstcoin.com.burst.mining;
 
+import android.content.SharedPreferences;
 import android.util.Log;
 import burstcoin.com.burst.BurstUtil;
-import burstcoin.com.burst.GetAsync;
+import burstcoin.com.burst.PostAsync;
 import burstcoin.com.burst.plotting.PlotFile;
 import burstcoin.com.burst.plotting.PlotFiles;
+import burstcoin.com.burst.tools.BurstContext;
 import fr.cryptohash.Shabal256;
 import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
@@ -40,7 +42,8 @@ public class MiningService implements IntMinerDeadLine{
 
     // Used for the GetBlockInfo from the Pool
     Timer mPoller;
-    static int POLL_SECONDS = 3;
+    int POLL_SECONDS;
+
     // This need to be a static pulled some a central point
     static String poolUrl = "http://m.burst4all.com";
     //static String poolUrl = "http://mobile.burst-team.us:8080";
@@ -70,10 +73,12 @@ public class MiningService implements IntMinerDeadLine{
     public void start() {
         Log.d(TAG, "Starting");
         running = true;
+        SharedPreferences settings = BurstContext.getAppContext().getSharedPreferences("MINING", 0);
+        int POLL_SECONDS = settings.getInt("POLLTIMER", 3);
         mPoller = new Timer();
         mPoller.schedule( new TimerTask() {
             public void run() {
-                // This is where we poll the webserver for block data
+                Log.v(TAG, "Polling for a new Block");
                 String mBlockData = GET(poolUrl+poolGetBlockInfo);
                 try {
                     JSONObject mJSONBlockData = new JSONObject(mBlockData);
@@ -119,10 +124,18 @@ public class MiningService implements IntMinerDeadLine{
     }
 
     public void SubmitShare(final Long mNonce) {
+        // This string contains miner and size as well
+        // bytes = sprintf_s(buffer, buffer_size, "POST /burst?requestType=submitNonce&accountId=%llu&nonce=%llu&deadline=%llu
+                                                // HTTP/1.0\r\n
+                                                // X-Miner: IBAndroid %s\r\n
+                                                // X-Capacity: %llu\r\n
+                                                // Connection: close\r\n\r\n", iter->account_id, iter->nonce, iter->best, version, total);
+
         String URL = poolUrl + "/burst/?requestType=submitNonce&secretPhrase=pool-mining&nonce=" + String.valueOf(mNonce) + "&accountId=" + mNumericID;
         if (mBestdeadline.compareTo(BigInteger.valueOf(mActiveBlock.targetDeadline)) < 0) {
             Log.d(TAG, "Submitting Share:" + mNonce);
-            GetAsync jsonCall = new GetAsync(URL) {
+            //GetAsync jsonCall = new GetAsync(URL) {
+            PostAsync jsonCall = new PostAsync() {
                 @Override
                 protected void onPostExecute(JSONObject json) {
                     if (json != null) {
@@ -141,7 +154,8 @@ public class MiningService implements IntMinerDeadLine{
                     }
                 }
             };
-            jsonCall.execute();
+            //jsonCall.execute();
+            jsonCall.execute(URL, "X-Miner","IBAndroid");
         }
         else {
             Log.d(TAG, "Did Not Submit: " + URL);
