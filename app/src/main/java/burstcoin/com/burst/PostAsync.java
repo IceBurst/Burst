@@ -7,7 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.HashMap;
 
-class PostAsync extends AsyncTask<String, String, JSONObject> {
+public class PostAsync extends AsyncTask<String, String, JSONObject> {
     JSONParser jsonParser = new JSONParser();
 
     final static String TAG = "PostAsync";
@@ -18,6 +18,16 @@ class PostAsync extends AsyncTask<String, String, JSONObject> {
     @Override
     protected void onPreExecute() {
 
+    }
+
+    public
+    PostAsync() {
+        super();
+    }
+
+    public PostAsync(String u) {
+        super();
+        this.URL = u;
     }
 
     @Override
