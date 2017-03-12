@@ -42,6 +42,8 @@ import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 import java.util.ArrayList;
 
+import burstcoin.com.burst.tools.WalletTool;
+
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, IntProvider {
 
     DatabaseHandler databaseHandler;
@@ -58,6 +60,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private String numericID = "";
     private String mPassPhrase = "";
     //Toolbar toolbar;
+
+    private WalletTool mActiveWallet;
+    private WalletTool mTheBestWallet;
 
     public final static String NUMERICID = "burstcoin.com.burst.NUMERICID";
     public final static String PASSPHRASE = "burstcoin.com.burst.PASSPHRASE";
@@ -97,12 +102,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
 
         //Context.getApplicationInfo().sourceDir;
-
         //Context.getPackageManager().getInstallerPackageName(packageName);
 
         mWebView = (WebView) findViewById(R.id.activity_main_webview);
 
-        String url = "https://mwallet.burst-team.us:8125/index.html";
+        // This is where we are putting in the new checks
+        findBestWallet();
+        String url = "https://" + mTheBestWallet.getURL() + "/index.html";
+        Log.d(TAG, "Using Wallet:" + url);
+
         String jsInjection = createBurstJSInjectionPassPhrase();    // This is complete BETA!!!
         loadSite(url, jsInjection);
 
@@ -658,5 +666,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    private void findBestWallet() {
+        WalletTool mStaticWallets[] = {
+            new WalletTool("wallet1.burstnation.com",8125),
+            new WalletTool("wallet2.burstnation.com",8125),
+            new WalletTool("wallet3.burstnation.com",8125),
+            new WalletTool("wallet.burst-team.us")};
+
+        mTheBestWallet = null;
+        long h;
+        long sp = 999999999;
+        h = 0;
+
+        for (WalletTool w : mStaticWallets ) {
+            w.GetHeight();
+            if (w.Height > h) {
+                h = w.Height;
+                mTheBestWallet = w;
+                Log.d(TAG,"Set New Wallet based on new Height");
+            }
+            if (w.Height == h && w.GetSpeed() < sp && w.GetSpeed() != 0) {
+                sp = w.GetSpeed();
+                mTheBestWallet = w;
+                Log.d(TAG,"Set New Wallet based on Speed");
+            }
+            Log.d(TAG, "Checking Wallet " + w.getURL() + " height:" + h + " speed was:" + w.GetSpeed()); // Add URL, add Speed result, we want the lowest speed number
+        }
+    }
 }
 
