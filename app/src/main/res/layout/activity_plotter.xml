@@ -73,7 +73,8 @@
         android:id="@+id/txtTestHolder"
         android:theme="@style/AppTheme.AppBarOverlay"
         android:layout_below="@+id/btnDeletePlot"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:visibility="invisible" />
     <!--  -->
         <!--android:layout_alignStart="@+id/txtDriveLabel"-->
 
