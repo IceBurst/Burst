@@ -1,5 +1,6 @@
 package burstcoin.com.burst.tools;
 
+import android.app.Application;
 import android.util.Log;
 import org.json.JSONObject;
 
@@ -18,7 +19,7 @@ import burstcoin.com.burst.GetAsync;
  * The WalletTool is used to get speed responses for wallets to help get the best miner
  *
  */
-public class WalletTool{
+public class WalletTool {
 
     // Get Block Height of a given wallet
     // https://wallet1.burstnation.com:8125/burst?requestType=getMiningInfo
@@ -63,7 +64,8 @@ public class WalletTool{
     // Internal use functions
     private void checkHeight() {
         //https://wallet1.burstnation.com:8125/burst?requestType=getMiningInfo
-        mStartTime = System.nanoTime();
+        //mStartTime = System.nanoTime();
+        mStartTime = System.currentTimeMillis();
         String mURL = "https://"+mWalletURL+":"+Integer.toString(mWalletPort)+"/burst?requestType=getMiningInfo";
         Log.d(TAG, "Starting Height Check for: " + mURL);
 
@@ -72,9 +74,9 @@ public class WalletTool{
             protected void onPostExecute(JSONObject json) {
                 Log.d(TAG, "PostExecute for checkHeight");
                 // This log line is never happening
-                long endTime = System.nanoTime();
+                //long endTime = System.nanoTime();
+                long endTime = System.currentTimeMillis();
                 mSpeed = (endTime - mStartTime);
-
                 try {
                     Height = Long.parseLong(json.getString("height"));
                 }

@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import burstcoin.com.burst.tools.BurstContext;
+import burstcoin.com.burst.tools.WalletTool;
 
 import static java.lang.Character.digit;
 
@@ -263,7 +264,8 @@ public class BurstUtil {
     // Get Burst NumericID from Online API
     public void getNumericIDFromBurstID(final String burstID, final Context context) {
 
-        String URL = "https://wallet.burst-team.us:8125/burst?requestType=rsConvert&account=" + burstID;
+        //String URL = "https://wallet.burst-team.us:8125/burst?requestType=rsConvert&account=" + burstID;
+        String URL = "https://"+BurstContext.getWallet().getURL()+"/burst?requestType=rsConvert&account=" + burstID;
 
         GetAsync jsonCall = new GetAsync(URL) {
             @Override
@@ -284,8 +286,11 @@ public class BurstUtil {
         jsonCall.execute(burstID);
     }
 
-    public void getRewardIDFromNumericID(final String numericID, final Context context) {
-        String URL = "https://mwallet.burst-team.us:8125/burst?requestType=getRewardRecipient&account=" + numericID;
+    public void getRewardIDFromNumericID(final String numericID, final Context context, final WalletTool wallet) {
+
+        //String URL = "https://mwallet.burst-team.us:8125/burst?requestType=getRewardRecipient&account=" + numericID;
+        String URL = "https://"+wallet.getURL()+"/burst?requestType=getRewardRecipient&account=" + numericID;
+
         Log.d(TAG, "GetRewardID:"+URL);
         GetAsync jsonCall = new GetAsync(URL) {
             @Override
@@ -307,7 +312,8 @@ public class BurstUtil {
 
     public static void setRewardAssignment(final String mNumericID, final String mPassPhrase) {
 
-        final String url = "https://wallet.burst-team.us:8125/burst";
+        //final String url = "https://wallet.burst-team.us:8125/burst";
+        final String url = "https://"+BurstContext.getWallet().getURL()+"/burst";
         ///burst?requestType=setRewardRecipient&account=" + mNumericID + "&secretPhrase=" + mPassPhrase
 
         PostAsync jsonCall = new PostAsync() {

@@ -2,6 +2,7 @@ package burstcoin.com.burst;
 
 import android.annotation.TargetApi;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -70,5 +71,6 @@ public class GetAsync extends AsyncTask<String, String, JSONObject> {
         }else{
             //Log.d("Failure", message);
         } */
+        Log.d("GetAsync", "Default Non-Override called");
     }
 }

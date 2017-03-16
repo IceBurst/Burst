@@ -42,6 +42,7 @@ import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 import java.util.ArrayList;
 
+import burstcoin.com.burst.tools.BurstContext;
 import burstcoin.com.burst.tools.WalletTool;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, IntProvider {
@@ -59,9 +60,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private String burstID = "";
     private String numericID = "";
     private String mPassPhrase = "";
-    //Toolbar toolbar;
 
-    private WalletTool mActiveWallet;
     private WalletTool mTheBestWallet;
 
     public final static String NUMERICID = "burstcoin.com.burst.NUMERICID";
@@ -85,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Load up a Spinner
         progressDialog=new ProgressDialog(MainActivity.this);
-        progressDialog.setMessage("Loading");
+        progressDialog.setMessage("Finding Wallet Server");
         progressDialog.show();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -108,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // This is where we are putting in the new checks
         findBestWallet();
+        BurstContext.setWallet(mTheBestWallet);
         String url = "https://" + mTheBestWallet.getURL() + "/index.html";
         Log.d(TAG, "Using Wallet:" + url);
 
@@ -139,7 +139,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_wallet:
                 progressDialog.show();
                 String jsInjectionWallet = createBurstJSInjectionPassPhrase();
-                loadSite("https://mwallet.burst-team.us:8125/index.html", jsInjectionWallet);
+                //loadSite("https://mwallet.burst-team.us:8125/index.html", jsInjectionWallet);
+                loadSite("https://"+BurstContext.getWallet().getURL()+"/index.html", jsInjectionWallet);
                 isAtHome=true;
                 break;
             case R.id.save_passphrase:
@@ -286,11 +287,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         }
                     }
                 });
-
                 dialog.show();
-
-
-
                 break;
             case R.id.load_passphrase:
 
@@ -463,7 +460,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }else{
                 isAtHome=true;
                 progressDialog.show();
-                mWebView.loadUrl("https://mwallet.burst-team.us:8125/index.html");
+                //mWebView.loadUrl("https://mwallet.burst-team.us:8125/index.html");
+                mWebView.loadUrl("https://"+BurstContext.getWallet().getURL()+"/index.html");
                 mWebView.setWebViewClient(new WebViewClient(){
                     @Override
                     public void onPageFinished(WebView view, String url) {
@@ -685,10 +683,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 mTheBestWallet = w;
                 Log.d(TAG,"Set New Wallet based on new Height");
             }
-            if (w.Height == h && w.GetSpeed() < sp && w.GetSpeed() != 0) {
-                sp = w.GetSpeed();
-                mTheBestWallet = w;
-                Log.d(TAG,"Set New Wallet based on Speed");
+           // if (w.Height == h && w.GetSpeed() < sp && w.GetSpeed() != 0) {
+            if (w.Height == h && w.GetSpeed() < sp ) {
+                    sp = w.GetSpeed();
+                    mTheBestWallet = w;
+                    Log.d(TAG,"Set New Wallet based on Speed");
             }
             Log.d(TAG, "Checking Wallet " + w.getURL() + " height:" + h + " speed was:" + w.GetSpeed()); // Add URL, add Speed result, we want the lowest speed number
         }

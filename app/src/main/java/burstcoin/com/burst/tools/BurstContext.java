@@ -8,6 +8,7 @@ import android.content.Context;
  */
 public class BurstContext extends Application {
     private static Context mContext;
+    private static WalletTool mWallet;
 
     public void onCreate() {
         super.onCreate();
@@ -16,5 +17,13 @@ public class BurstContext extends Application {
 
     public static Context getAppContext() {
         return  mContext;
+    }
+
+    public static void setWallet(WalletTool w) {
+        mWallet = w;
+    }
+
+    public static WalletTool getWallet() {
+        return mWallet;
     }
 }
