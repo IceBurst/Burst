@@ -4,14 +4,13 @@
     android:layout_height="match_parent"
     android:weightSum="1">
 
-
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/imageView3"
         android:layout_gravity="center_horizontal"
         android:src="@drawable/burstcoin_pokerchip"
-        android:layout_marginTop="8dp">
+        android:layout_marginTop="24dp" />
 
     <Space
         android:layout_width="match_parent"
@@ -25,7 +24,8 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="Please Wait Loading...."
         android:layout_gravity="center_horizontal"
-        android:id="@+id/textView2" />
+        android:id="@+id/textView2"
+        android:layout_marginBottom="5dp"/>
 
     <ImageView
         android:layout_width="wrap_content"

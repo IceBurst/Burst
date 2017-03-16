@@ -106,8 +106,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mWebView = (WebView) findViewById(R.id.activity_main_webview);
 
         // This is where we are putting in the new checks
-        findBestWallet();
-        BurstContext.setWallet(mTheBestWallet);
+
+        mTheBestWallet = BurstContext.getWallet();
         String url = "https://" + mTheBestWallet.getURL() + "/index.html";
         Log.d(TAG, "Using Wallet:" + url);
 
@@ -661,35 +661,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         else { //permission is automatically granted on sdk<23 upon installation
             Log.v(TAG,"Permission is granted");
             return true;
-        }
-    }
-
-    private void findBestWallet() {
-        WalletTool mStaticWallets[] = {
-            new WalletTool("wallet1.burstnation.com",8125),
-            new WalletTool("wallet2.burstnation.com",8125),
-            new WalletTool("wallet3.burstnation.com",8125),
-            new WalletTool("wallet.burst-team.us")};
-
-        mTheBestWallet = null;
-        long h;
-        long sp = 999999999;
-        h = 0;
-
-        for (WalletTool w : mStaticWallets ) {
-            w.GetHeight();
-            if (w.Height > h) {
-                h = w.Height;
-                mTheBestWallet = w;
-                Log.d(TAG,"Set New Wallet based on new Height");
-            }
-           // if (w.Height == h && w.GetSpeed() < sp && w.GetSpeed() != 0) {
-            if (w.Height == h && w.GetSpeed() < sp ) {
-                    sp = w.GetSpeed();
-                    mTheBestWallet = w;
-                    Log.d(TAG,"Set New Wallet based on Speed");
-            }
-            Log.d(TAG, "Checking Wallet " + w.getURL() + " height:" + h + " speed was:" + w.GetSpeed()); // Add URL, add Speed result, we want the lowest speed number
         }
     }
 }
