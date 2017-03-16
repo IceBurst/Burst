@@ -22,16 +22,27 @@
         android:label="Burst Wallet"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <!-- SplashScreen Activity -->
+        <activity
+            android:name=".SplashScreen"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Black.NoTitleBar" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
             android:label="Burstcoin Wallet"
             android:screenOrientation="sensorPortrait"
             android:theme="@style/AppTheme.ActionBar.Transparent">
-            <intent-filter>
+            <!-- <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            </intent-filter> -->
         </activity>
         <!--
              ATTENTION: This was auto-generated to add Google Play services to your project for
