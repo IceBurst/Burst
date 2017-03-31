@@ -36,6 +36,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.appindexing.AppIndex;
@@ -108,7 +109,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // This is where we are putting in the new checks
 
         mTheBestWallet = BurstContext.getWallet();
-        String url = "https://" + mTheBestWallet.getURL() + "/index.html";
+        if(mTheBestWallet == null) {
+            findBestWallet();
+            BurstContext.setWallet(mTheBestWallet);
+        }
+
+        String url = "";
+        try {
+            url = "https://" + mTheBestWallet.getURL() + "/index.html";
+        }
+        catch (Exception e) { // Force a damn wallet
+            WalletTool w  = new WalletTool("wallet1.burstnation.com",8125);
+            BurstContext.setWallet(w);
+            mTheBestWallet = w;
+            url = "https://" + mTheBestWallet.getURL() + "/index.html";
+        }
         Log.d(TAG, "Using Wallet:" + url);
 
         String jsInjection = createBurstJSInjectionPassPhrase();    // This is complete BETA!!!
@@ -131,9 +146,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void selectDrawerItem(MenuItem menuItem) {
-        // Create a new fragment and specify the planet to show based on
-        // position
-
+        // Create a new fragment and specify the planet to show based on position
         switch (menuItem.getItemId()) {
 
             case R.id.nav_wallet:
@@ -390,7 +403,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void menuNavigator() {
-        // This is a
         switch (navPath) {
             case NAV_PLOTTING:
                 Intent plotIntent = new Intent(this, PlotterActivity.class);
@@ -478,6 +490,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+        TextView txtWalletURL = (TextView) findViewById(R.id.textBurstURL);
+        txtWalletURL.setText(mTheBestWallet.getURL());
         return true;
     }
 
@@ -661,6 +675,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         else { //permission is automatically granted on sdk<23 upon installation
             Log.v(TAG,"Permission is granted");
             return true;
+        }
+    }
+    private void findBestWallet() {
+        WalletTool mStaticWallets[] = {
+                new WalletTool("wallet1.burstnation.com",8125),
+                new WalletTool("wallet2.burstnation.com",8125),
+                new WalletTool("wallet3.burstnation.com",8125),
+                new WalletTool("wallet.burst-team.us")};
+
+        mTheBestWallet = null;
+        long h;
+        long sp = 999999999;
+        h = 0;
+
+        for (WalletTool w : mStaticWallets ) {
+            w.GetHeight();
+            if (w.Height > h) {
+                h = w.Height;
+                mTheBestWallet = w;
+                Log.d(TAG,"Set New Wallet based on new Height");
+            }
+            // if (w.Height == h && w.GetSpeed() < sp && w.GetSpeed() != 0) {
+            if (w.Height == h && w.GetSpeed() < sp ) {
+                sp = w.GetSpeed();
+                mTheBestWallet = w;
+                Log.d(TAG,"Set New Wallet based on Speed");
+            }
+            Log.d(TAG, "Checking Wallet " + w.getURL() + " height:" + h + " speed was:" + w.GetSpeed()); // Add URL, add Speed result, we want the lowest speed number
         }
     }
 }

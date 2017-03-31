@@ -29,10 +29,11 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/textBurstURL"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="https://wallet.burst-team.us" />
+        android:text=" " />
+    <!-- https://wallet.burst-team.us-->
 
 
 </LinearLayout>
