@@ -1,0 +1,11 @@
+sudo add-apt-repository ppa:openjdk-r/ppa
+sudo apt-get update
+sudo apt-get install openjdk-8-jdk
+sudo update-alternatives --config java
+sudo update-alternatives --config javac
+java -version
+sudo apt-get install git
+git clone https://github.com/BurstProject/burstcoin
+cd burstcoin/
+burstcoin$ ./run.sh
+
